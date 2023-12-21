@@ -32,21 +32,10 @@ export class AuthService {
   }
 
   login(userData, response) {
-    const accessToken = this.getAuthToken(userData);
-    const expiry = parseInt(process.env.ACCESS_CODE_EXPIRY);
-    const expires = new Date(Date.now() + expiry);
-    return response
-      .cookie(process.env.COOKIE_NAME, accessToken, {
-        httpOnly: true,
-        sameSite: 'none',
-        secure: true,
-        expires,
-      })
-      .send({
-        statusCode: 200,
-        message: 'Login Successful',
-        expires,
-      });
+    const token= this.getAuthToken(userData);
+    return response.json({
+      token
+    })
   }
 
   async verifyUser(login) {
