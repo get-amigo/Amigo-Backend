@@ -16,11 +16,10 @@ const GroupSchema = new Schema(
     description: {
       type: String,
       required: false,
-    },
-    // You can add more fields as necessary for your application
+    }
   },
   {
-    timestamps: true, // This will add createdAt and updatedAt fields automatically
+    timestamps: true,
   },
 );
 
