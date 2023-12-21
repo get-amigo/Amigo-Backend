@@ -14,23 +14,12 @@ export class GroupController {
     return this.groupService.create(createGroupBody);
   }
 
-  @Get()
-  findAll() {
-    return this.groupService.findAll();
+  @UseGuards(new JwtAuthGuard('jwt'))
+  @Post(":id/join")
+  joinGroup(@Req() req: Request,@Param("id") groupId) {
+    const { id } = req["user"];
+    return this.groupService.joinGroup(groupId,new Types.ObjectId(id));
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.groupService.findOne(+id);
-  }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGroupDto) {
-    return this.groupService.update(+id, updateGroupDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.groupService.remove(+id);
-  }
 }
