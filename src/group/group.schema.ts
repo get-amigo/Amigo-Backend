@@ -1,5 +1,13 @@
 import { Schema } from 'mongoose';
 
+const MemberSchema = new Schema({
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    unique: true
+  }
+});
+
 const GroupSchema = new Schema(
   {
     name: {
@@ -7,12 +15,7 @@ const GroupSchema = new Schema(
       required: true,
       unique: true,
     },
-    members: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'User'
-      }
-    ]
+    members: [MemberSchema]
   },
   {
     timestamps: true,
