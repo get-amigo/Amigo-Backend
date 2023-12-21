@@ -2,7 +2,7 @@ import { Schema } from 'mongoose';
 
 const GroupSchema = new Schema(
   {
-    groupName: {
+    name: {
       type: String,
       required: true,
       unique: true,

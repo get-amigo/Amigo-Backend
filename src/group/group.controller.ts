@@ -8,11 +8,8 @@ export class GroupController {
   @UseGuards(new JwtAuthGuard('jwt'))
   @Post()
   create(@Req() req: Request,@Body() createGroupBody) {
-    // const { id } = req["user"];
-    console.log("rc",req["user"])
-    createGroupBody["members"]=[
-
-    ];
+    const { id } = req["user"];
+    createGroupBody["members"]=[id];
     return this.groupService.create(createGroupBody);
   }
 

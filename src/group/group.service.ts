@@ -1,9 +1,16 @@
 import { Injectable } from '@nestjs/common';
-
+import GroupSchema from './group.schema';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 @Injectable()
 export class GroupService {
+  constructor(
+    @InjectModel(GroupSchema.name)
+    private groupModel: Model<typeof GroupSchema>,
+  ) {}
   create(createGroupDto) {
-    return 'This action adds a new group';
+    const createdGroup = new this.groupModel(createGroupDto);
+    return createdGroup.save();
   }
 
   findAll() {
