@@ -20,7 +20,6 @@ export class GroupService {
       throw new NotFoundException('Group not found');
     }
 
-    console.log("group",group)
 
     const {members}=group;
     // Check if the user is already a member of the group
