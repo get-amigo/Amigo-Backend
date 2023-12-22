@@ -41,4 +41,9 @@ export class BalanceService {
     }
     return deletedBalance;
   }
+
+  async updateBalancesAfterTransaction(transactionDto) {
+    // Your logic to update balances based on the transaction
+    // ...
+}
 }
