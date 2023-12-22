@@ -34,7 +34,8 @@ export class AuthService {
   login(userData, response) {
     const token= this.getAuthToken(userData);
     return response.json({
-      token
+      token,
+      userData
     })
   }
 
