@@ -136,7 +136,7 @@ export class BalanceService {
         // Save the updated balance
         await userBalance.save();
       }
-
+      this.reduceTransactions(group);
       return true; // Indicates success
     } catch (error) {
       console.error('Error updating balances after transaction:', error);
