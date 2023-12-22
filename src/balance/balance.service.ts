@@ -44,6 +44,81 @@ export class BalanceService {
     return deletedBalance;
   }
 
+  async reduceTransactions(group: string) {
+    try {
+      // Get the balances for the specified group
+      const balances = await this.balanceModel.find({ group }).exec();
+
+      // Separate users into two categories: positive balance and negative balance
+      const positiveBalances = balances.filter((balance) => {
+        const totalOwed = [...balance.amountOwed.values()].reduce((acc, amount) => acc + amount, 0);
+        return totalOwed > 0;
+      });
+
+      const negativeBalances = balances.filter((balance) => {
+        const totalOwed = [...balance.amountOwed.values()].reduce((acc, amount) => acc + amount, 0);
+        return totalOwed < 0;
+      });
+
+      // Sort users in each category by the absolute value of their total owed amount
+      positiveBalances.sort((a, b) => {
+        const totalA = [...a.amountOwed.values()].reduce((acc, amount) => acc + Math.abs(amount), 0);
+        const totalB = [...b.amountOwed.values()].reduce((acc, amount) => acc + Math.abs(amount), 0);
+        return totalB - totalA;
+      });
+
+      negativeBalances.sort((a, b) => {
+        const totalA = [...a.amountOwed.values()].reduce((acc, amount) => acc + Math.abs(amount), 0);
+        const totalB = [...b.amountOwed.values()].reduce((acc, amount) => acc + Math.abs(amount), 0);
+        return totalB - totalA;
+      });
+
+      // Perform the balancing algorithm and generate optimized transactions
+      const transactions = [];
+
+      while (positiveBalances.length > 0 && negativeBalances.length > 0) {
+        const receiver = positiveBalances[0];
+        const sender = negativeBalances[0];
+
+        const amountTransferred = Math.min(
+          Math.abs([...sender.amountOwed.values()].reduce((acc, amount) => acc + amount, 0)),
+          Math.abs([...receiver.amountOwed.values()].reduce((acc, amount) => acc + amount, 0))
+        );
+
+        // Create a transaction for the amount transferred
+        transactions.push({
+          from: sender.user,
+          to: receiver.user,
+          amount: amountTransferred,
+        });
+
+        // Update balances
+        [...sender.amountOwed.keys()].forEach((payerId) => {
+          sender.amountOwed.set(payerId, (sender.amountOwed.get(payerId) || 0) + amountTransferred);
+        });
+
+        [...receiver.amountOwed.keys()].forEach((payerId) => {
+          receiver.amountOwed.set(payerId, (receiver.amountOwed.get(payerId) || 0) - amountTransferred);
+        });
+
+        // Remove users with zero balance from their respective categories
+        if ([...sender.amountOwed.values()].every((amount) => amount === 0)) {
+          negativeBalances.shift();
+        }
+
+        if ([...receiver.amountOwed.values()].every((amount) => amount === 0)) {
+          positiveBalances.shift();
+        }
+      }
+
+      // At this point, the `transactions` array contains optimized transactions
+      return transactions;
+    } catch (error) {
+      console.error('Error reducing transactions:', error);
+      return null;
+    }
+  }
+
   async updateBalancesAfterTransaction(transactionDto) {
     try {
       // Get the group and transaction details
