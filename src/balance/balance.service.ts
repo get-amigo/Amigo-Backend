@@ -47,10 +47,7 @@ export class BalanceService {
   async updateBalancesAfterTransaction(transactionDto) {
     try {
       // Get the group and transaction details
-      const { group, paidBy, splitAmong, amount } = transactionDto;
-
-      // Calculate the split amount per user
-      const splitAmountPerUser = amount / splitAmong.length;
+      const { group, paidBy, splitAmong } = transactionDto;
 
       // Update balances for each user in the group
       for (const split of splitAmong) {
@@ -59,7 +56,7 @@ export class BalanceService {
 
         // Update the user's balance
         userBalance.amountOwed = userBalance.amountOwed || new Map();
-        userBalance.amountOwed.set(paidBy.toString(), (userBalance.amountOwed.get(paidBy.toString()) || 0) - splitAmountPerUser);
+        userBalance.amountOwed.set(paidBy.toString(), (userBalance.amountOwed.get(paidBy.toString()) || 0) - split.amount);
 
         // Save the updated balance
         await userBalance.save();
