@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { GroupModule } from './group/group.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { BalanceModule } from './balance/balance.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { BalanceModule } from './balance/balance.module';
     AuthModule,
     GroupModule,
     TransactionModule,
-    BalanceModule
+    BalanceModule,
+    PaymentModule
   ],
   controllers: [AppController],
   providers: [AppService],
