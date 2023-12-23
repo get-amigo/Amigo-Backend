@@ -26,13 +26,15 @@ export class TransactionService {
   }
 
   getTransactionsByGroupId(groupId) {
-    return this.transactionModel.find({ group: groupId })
-                                .populate('paidBy', 'name') // Populate the 'paidBy' field with the 'name' from the User collection
-                                .populate({
-                                    path: 'splitAmong.user', // Specify the path to the field in the array
-                                    select: 'name' // Select only the 'name' field from the User collection
-                                })
-                                .exec(); // Execute the query
+    return this.transactionModel
+        .find({ group: groupId })
+        .populate('paidBy', 'name')
+        .populate({
+            path: 'splitAmong.user',
+            select: 'name'
+        })
+        .sort({ date: -1 }) // Sort by date in descending order
+        .exec();
 }
 
 
