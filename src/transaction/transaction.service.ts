@@ -24,4 +24,9 @@ export class TransactionService {
   private async updateBalances(transactionDto) {
     await this.balanceService.updateBalancesAfterTransaction(transactionDto);
   }
+
+  getTransactionsByGroupId(groupId){
+    return this.transactionModel.find({ group: groupId });
+}
+
 }
