@@ -18,4 +18,8 @@ export class UsersService {
   async findByEmail(email: string) {
     return await this.userModel.findOne({ email }).exec();
   }
+
+  async findById(id){
+    return await this.userModel.findById(id).exec();
+  }
 }
