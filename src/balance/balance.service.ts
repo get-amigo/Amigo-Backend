@@ -206,6 +206,10 @@ export class BalanceService {
       return false; // Indicates failure
     }
   }
+
   
+async getBalanceData(groupId) {
+    return await this.balanceModel.find({ group: groupId }).exec();
+}
   
 }
