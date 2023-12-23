@@ -32,11 +32,11 @@ export class AuthService {
   }
 
   login(userData, response) {
-    const token= this.getAuthToken(userData);
+    const token = this.getAuthToken(userData);
     return response.json({
       token,
-      userData
-    })
+      userData,
+    });
   }
 
   async verifyUser(login) {

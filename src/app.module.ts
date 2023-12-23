@@ -19,7 +19,7 @@ import { PaymentModule } from './payment/payment.module';
     GroupModule,
     TransactionModule,
     BalanceModule,
-    PaymentModule
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

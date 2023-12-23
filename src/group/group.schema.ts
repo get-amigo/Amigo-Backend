@@ -6,15 +6,17 @@ const GroupSchema = new Schema(
       type: String,
       required: true,
     },
-    members: [{
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      unique:true
-    }],
+    members: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        unique: true,
+      },
+    ],
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export default { name: 'Group', schema: GroupSchema };

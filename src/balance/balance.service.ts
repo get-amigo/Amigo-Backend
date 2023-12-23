@@ -6,9 +6,12 @@ import BalanceSchema from './balance.schema';
 @Injectable()
 export class BalanceService {
   constructor(
-    @InjectModel(BalanceSchema.name) private balanceModel: Model<{user: "string",
-    group: string,
-    amountOwed: Map<number,number>}>,
+    @InjectModel(BalanceSchema.name)
+    private balanceModel: Model<{
+      user: 'string';
+      group: string;
+      amountOwed: Map<number, number>;
+    }>,
   ) {}
 
   async create(createBalanceDto) {
@@ -29,7 +32,9 @@ export class BalanceService {
   }
 
   async update(id: string, updateBalanceDto) {
-    const updatedBalance = await this.balanceModel.findByIdAndUpdate(id, updateBalanceDto, { new: true }).exec();
+    const updatedBalance = await this.balanceModel
+      .findByIdAndUpdate(id, updateBalanceDto, { new: true })
+      .exec();
     if (!updatedBalance) {
       throw new NotFoundException(`Balance with ID ${id} not found`);
     }
@@ -51,25 +56,43 @@ export class BalanceService {
 
       // Separate users into two categories: positive balance and negative balance
       const positiveBalances = balances.filter((balance) => {
-        const totalOwed = [...balance.amountOwed.values()].reduce((acc, amount) => acc + amount, 0);
+        const totalOwed = [...balance.amountOwed.values()].reduce(
+          (acc, amount) => acc + amount,
+          0,
+        );
         return totalOwed > 0;
       });
 
       const negativeBalances = balances.filter((balance) => {
-        const totalOwed = [...balance.amountOwed.values()].reduce((acc, amount) => acc + amount, 0);
+        const totalOwed = [...balance.amountOwed.values()].reduce(
+          (acc, amount) => acc + amount,
+          0,
+        );
         return totalOwed < 0;
       });
 
       // Sort users in each category by the absolute value of their total owed amount
       positiveBalances.sort((a, b) => {
-        const totalA = [...a.amountOwed.values()].reduce((acc, amount) => acc + Math.abs(amount), 0);
-        const totalB = [...b.amountOwed.values()].reduce((acc, amount) => acc + Math.abs(amount), 0);
+        const totalA = [...a.amountOwed.values()].reduce(
+          (acc, amount) => acc + Math.abs(amount),
+          0,
+        );
+        const totalB = [...b.amountOwed.values()].reduce(
+          (acc, amount) => acc + Math.abs(amount),
+          0,
+        );
         return totalB - totalA;
       });
 
       negativeBalances.sort((a, b) => {
-        const totalA = [...a.amountOwed.values()].reduce((acc, amount) => acc + Math.abs(amount), 0);
-        const totalB = [...b.amountOwed.values()].reduce((acc, amount) => acc + Math.abs(amount), 0);
+        const totalA = [...a.amountOwed.values()].reduce(
+          (acc, amount) => acc + Math.abs(amount),
+          0,
+        );
+        const totalB = [...b.amountOwed.values()].reduce(
+          (acc, amount) => acc + Math.abs(amount),
+          0,
+        );
         return totalB - totalA;
       });
 
@@ -81,8 +104,18 @@ export class BalanceService {
         const sender = negativeBalances[0];
 
         const amountTransferred = Math.min(
-          Math.abs([...sender.amountOwed.values()].reduce((acc, amount) => acc + amount, 0)),
-          Math.abs([...receiver.amountOwed.values()].reduce((acc, amount) => acc + amount, 0))
+          Math.abs(
+            [...sender.amountOwed.values()].reduce(
+              (acc, amount) => acc + amount,
+              0,
+            ),
+          ),
+          Math.abs(
+            [...receiver.amountOwed.values()].reduce(
+              (acc, amount) => acc + amount,
+              0,
+            ),
+          ),
         );
 
         // Create a transaction for the amount transferred
@@ -94,11 +127,17 @@ export class BalanceService {
 
         // Update balances
         [...sender.amountOwed.keys()].forEach((payerId) => {
-          sender.amountOwed.set(payerId, (sender.amountOwed.get(payerId) || 0) + amountTransferred);
+          sender.amountOwed.set(
+            payerId,
+            (sender.amountOwed.get(payerId) || 0) + amountTransferred,
+          );
         });
 
         [...receiver.amountOwed.keys()].forEach((payerId) => {
-          receiver.amountOwed.set(payerId, (receiver.amountOwed.get(payerId) || 0) - amountTransferred);
+          receiver.amountOwed.set(
+            payerId,
+            (receiver.amountOwed.get(payerId) || 0) - amountTransferred,
+          );
         });
 
         // Remove users with zero balance from their respective categories
@@ -131,7 +170,10 @@ export class BalanceService {
 
         // Update the user's balance
         userBalance.amountOwed = userBalance.amountOwed || new Map();
-        userBalance.amountOwed.set(paidBy.toString(), (userBalance.amountOwed.get(paidBy.toString()) || 0) - split.amount);
+        userBalance.amountOwed.set(
+          paidBy.toString(),
+          (userBalance.amountOwed.get(paidBy.toString()) || 0) - split.amount,
+        );
 
         // Save the updated balance
         await userBalance.save();

@@ -5,8 +5,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import BalanceSchema from './balance.schema';
 
 @Module({
-  imports:[MongooseModule.forFeature([BalanceSchema])],
+  imports: [MongooseModule.forFeature([BalanceSchema])],
   controllers: [BalanceController],
-  providers: [BalanceService]
+  providers: [BalanceService],
 })
 export class BalanceModule {}

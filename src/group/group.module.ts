@@ -7,6 +7,6 @@ import GroupSchema from './group.schema';
 @Module({
   imports: [MongooseModule.forFeature([GroupSchema])],
   controllers: [GroupController],
-  providers: [GroupService]
+  providers: [GroupService],
 })
 export class GroupModule {}
