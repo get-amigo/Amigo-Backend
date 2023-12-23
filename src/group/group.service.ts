@@ -42,15 +42,26 @@ export class GroupService {
   }
 
   async getAllUserGroups(userId) {
-    // Find all groups where the userId is in the members array
-    const userGroups = await this.groupModel.find({ members: { $in: [userId] } }).exec();
+    try {
+      // Find all groups where the userId is in the members array and populate the 'members' field
+      const userGroups = await this.groupModel
+        .find({ members: { $in: [userId] } })
+        .populate('members', 'name') // Populate the 'members' field and select the 'name' field
+        .exec();
   
-    if (!userGroups || userGroups.length === 0) {
-      throw new NotFoundException('No groups found for this user');
+      if (!userGroups || userGroups.length === 0) {
+        throw new NotFoundException('No groups found for this user');
+      }
+  
+      // Return the list of groups with the names of their members
+      return userGroups;
+    } catch (error) {
+      // Handle any errors that occur during the database query
+      console.error('Error getting user groups:', error);
+      throw error;
     }
-  
-    return userGroups; // Return the list of groups
   }
+  
 
   async getAllTransactions(groupId){
     return this.transactionService.getTransactionsByGroupId(groupId);
