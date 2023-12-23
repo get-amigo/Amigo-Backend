@@ -21,10 +21,4 @@ export class TransactionController {
   createTransaction(@Body() createTransactionDto) {
     return this.transactionService.createTransaction(createTransactionDto);
   }
-
-  // @Get(":groupId")
-  // getAllTransactionsInGroup(@Req() req: Request,@Param('id') groupId){
-  //   const { id } = req['user'];
-  //   return this.transactionService.getTransactions()
-  // }
 }

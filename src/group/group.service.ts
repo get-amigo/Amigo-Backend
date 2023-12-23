@@ -6,11 +6,13 @@ import {
 import GroupSchema from './group.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model,Types } from 'mongoose';
+import { TransactionService } from 'src/transaction/transaction.service';
 @Injectable()
 export class GroupService {
   constructor(
     @InjectModel(GroupSchema.name)
     private groupModel: Model<{ name: string; members: [string] }>,
+    private transactionService:TransactionService
   ) {}
   create(createGroupDto) {
     const createdGroup = new this.groupModel(createGroupDto);
@@ -49,5 +51,8 @@ export class GroupService {
   
     return userGroups; // Return the list of groups
   }
-  
+
+  async getAllTransactions(groupId){
+    return this.transactionService.getTransactionsByGroupId(groupId);
+  }
 }

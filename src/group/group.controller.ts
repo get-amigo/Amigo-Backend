@@ -3,9 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   UseGuards,
   Req,
 } from '@nestjs/common';
@@ -36,5 +34,10 @@ export class GroupController {
   joinGroup(@Req() req: Request, @Param('id') groupId) {
     const { id } = req['user'];
     return this.groupService.joinGroup(groupId, new Types.ObjectId(id));
+  }
+
+  @Get(":id/transactions")
+  getAllTransactions(@Param('id') groupId){
+    return this.groupService.getAllTransactions(groupId);
   }
 }
