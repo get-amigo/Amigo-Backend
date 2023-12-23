@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import GroupSchema from './group.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model,Types } from 'mongoose';
 @Injectable()
 export class GroupService {
   constructor(
@@ -38,4 +38,16 @@ export class GroupService {
 
     return group; // Or some other meaningful response
   }
+
+  async getAllUserGroups(userId) {
+    // Find all groups where the userId is in the members array
+    const userGroups = await this.groupModel.find({ members: { $in: [userId] } }).exec();
+  
+    if (!userGroups || userGroups.length === 0) {
+      throw new NotFoundException('No groups found for this user');
+    }
+  
+    return userGroups; // Return the list of groups
+  }
+  
 }

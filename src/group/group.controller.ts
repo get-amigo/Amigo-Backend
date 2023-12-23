@@ -12,11 +12,12 @@ import {
 import { GroupService } from './group.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Types } from 'mongoose';
+
+@UseGuards(new JwtAuthGuard('jwt'))
 @Controller('group')
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
 
-  @UseGuards(new JwtAuthGuard('jwt'))
   @Post()
   create(@Req() req: Request, @Body() createGroupBody) {
     const { id } = req['user'];
@@ -24,7 +25,13 @@ export class GroupController {
     return this.groupService.create(createGroupBody);
   }
 
-  @UseGuards(new JwtAuthGuard('jwt'))
+  @Get()
+  async getAllUserGroups(@Req() req: Request)
+  {
+    const { id } = req['user'];
+    return this.groupService.getAllUserGroups(id);
+  }
+
   @Post(':id/join')
   joinGroup(@Req() req: Request, @Param('id') groupId) {
     const { id } = req['user'];
