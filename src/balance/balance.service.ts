@@ -127,7 +127,8 @@ export class BalanceService {
   
   async getBalanceData(groupId) {
     return await this.balanceModel.find({ group: groupId })
-      .populate('user', 'name') // Populate the 'user' field and include 'name' only
+      .populate('borrower', 'name')
+      .populate('lender','name') // Populate the 'user' field and include 'name' only
       .exec();
   }
   
