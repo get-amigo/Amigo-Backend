@@ -208,8 +208,10 @@ export class BalanceService {
   }
 
   
-async getBalanceData(groupId) {
-    return await this.balanceModel.find({ group: groupId }).exec();
-}
+  async getBalanceData(groupId) {
+    return await this.balanceModel.find({ group: groupId })
+      .populate('user', 'name') // Populate the 'user' field and include 'name' only
+      .exec();
+  }
   
 }
