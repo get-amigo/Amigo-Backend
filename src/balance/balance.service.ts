@@ -49,163 +49,80 @@ export class BalanceService {
     return deletedBalance;
   }
 
-  async reduceTransactions(group: string) {
-    try {
-      // Get the balances for the specified group
-      const balances = await this.balanceModel.find({ group }).exec();
+   minimizeTransactions(transactions) {
+    let balances = {};
 
-      // Separate users into two categories: positive balance and negative balance
-      const positiveBalances = balances.filter((balance) => {
-        const totalOwed = [...balance.amountOwed.values()].reduce(
-          (acc, amount) => acc + amount,
-          0,
-        );
-        return totalOwed > 0;
-      });
-
-      const negativeBalances = balances.filter((balance) => {
-        const totalOwed = [...balance.amountOwed.values()].reduce(
-          (acc, amount) => acc + amount,
-          0,
-        );
-        return totalOwed < 0;
-      });
-
-      // Sort users in each category by the absolute value of their total owed amount
-      positiveBalances.sort((a, b) => {
-        const totalA = [...a.amountOwed.values()].reduce(
-          (acc, amount) => acc + Math.abs(amount),
-          0,
-        );
-        const totalB = [...b.amountOwed.values()].reduce(
-          (acc, amount) => acc + Math.abs(amount),
-          0,
-        );
-        return totalB - totalA;
-      });
-
-      negativeBalances.sort((a, b) => {
-        const totalA = [...a.amountOwed.values()].reduce(
-          (acc, amount) => acc + Math.abs(amount),
-          0,
-        );
-        const totalB = [...b.amountOwed.values()].reduce(
-          (acc, amount) => acc + Math.abs(amount),
-          0,
-        );
-        return totalB - totalA;
-      });
-
-      // Perform the balancing algorithm and generate optimized transactions
-      const transactions = [];
-
-      while (positiveBalances.length > 0 && negativeBalances.length > 0) {
-        const receiver = positiveBalances[0];
-        const sender = negativeBalances[0];
-
-        const amountTransferred = Math.min(
-          Math.abs(
-            [...sender.amountOwed.values()].reduce(
-              (acc, amount) => acc + amount,
-              0,
-            ),
-          ),
-          Math.abs(
-            [...receiver.amountOwed.values()].reduce(
-              (acc, amount) => acc + amount,
-              0,
-            ),
-          ),
-        );
-
-        // Create a transaction for the amount transferred
-        transactions.push({
-          from: sender.user,
-          to: receiver.user,
-          amount: amountTransferred,
-        });
-
-        // Update balances
-        [...sender.amountOwed.keys()].forEach((payerId) => {
-          sender.amountOwed.set(
-            payerId,
-            (sender.amountOwed.get(payerId) || 0) + amountTransferred,
-          );
-        });
-
-        [...receiver.amountOwed.keys()].forEach((payerId) => {
-          receiver.amountOwed.set(
-            payerId,
-            (receiver.amountOwed.get(payerId) || 0) - amountTransferred,
-          );
-        });
-
-        // Remove users with zero balance from their respective categories
-        if ([...sender.amountOwed.values()].every((amount) => amount === 0)) {
-          negativeBalances.shift();
+    // Calculate net balances for each individual
+    transactions.forEach(transaction => {
+        if (!balances[transaction.lender]) {
+            balances[transaction.lender] = 0;
+        }
+        if (!balances[transaction.borrower]) {
+            balances[transaction.borrower] = 0;
         }
 
-        if ([...receiver.amountOwed.values()].every((amount) => amount === 0)) {
-          positiveBalances.shift();
-        }
-      }
+        balances[transaction.lender] += transaction.amount;
+        balances[transaction.borrower] -= transaction.amount;
+    });
 
-      // At this point, the `transactions` array contains optimized transactions
-      return transactions;
-    } catch (error) {
-      console.error('Error reducing transactions:', error);
-      return null;
+    let creditors = [];
+    let debtors = [];
+
+    // Separate into creditors and debtors
+    for (let person in balances) {
+        if (balances[person] > 0) {
+            creditors.push({ person, amount: balances[person] });
+        } else if (balances[person] < 0) {
+            debtors.push({ person, amount: -balances[person] });
+        }
     }
-  }
+
+    let optimizedTransactions = [];
+
+    // Minimize transactions
+    while (creditors.length && debtors.length) {
+        let creditor = creditors[0];
+        let debtor = debtors[0];
+        let minAmount = Math.min(creditor.amount, debtor.amount);
+
+        optimizedTransactions.push({ lender: creditor.person, borrower: debtor.person, amount: minAmount });
+
+        creditor.amount -= minAmount;
+        debtor.amount -= minAmount;
+
+        if (creditor.amount === 0) creditors.shift();
+        if (debtor.amount === 0) debtors.shift();
+    }
+
+    return optimizedTransactions;
+}
 
   async updateBalancesAfterTransaction(transactionDto) {
-    try {
-      // Get the group and transaction details
-      const { group, paidBy, splitAmong } = transactionDto;
-  
-      // Update balances for each user in the group
-      for (const split of splitAmong) {
-        const user = split.user;
-  
-        // Skip if the user is the one who paid, as a user can't owe money to themselves
-        if (paidBy.toString() === user.toString()) {
-          continue;
+    const { paidBy, splitAmong, group } = transactionDto;
+
+    // Create balances array from transactionDto
+    const balances = splitAmong.reduce((acc, { user, amount }) => {
+        if (paidBy !== user) {
+            acc.push({
+                lender: paidBy,
+                borrower: user,
+                amount
+            });
         }
+        return acc;
+    }, []);
+
+    const savedBalances = await this.balanceModel.find({ group });
+    const combinedBalances = savedBalances.concat(balances);
+    const updatedBalances=this.minimizeTransactions(combinedBalances);
+    updatedBalances.forEach(obj=>obj.group=group)
   
-        let userBalance = await this.balanceModel.findOne({ user, group });
-  
-        // If userBalance doesn't exist, create a new one
-        if (!userBalance) {
-          userBalance = new this.balanceModel({
-            user,
-            group,
-            amountOwed: {} // Initialize an empty Map
-          });
-        }
-  
-        // Convert amountOwed to a JavaScript Map
-        const owedAmounts = new Map(userBalance.amountOwed);
-  
-        // Update the owed amount
-        const paidByIdString = paidBy.toString();
-        const currentOwedAmount = owedAmounts.get(paidByIdString) || 0;
-        owedAmounts.set(paidByIdString, currentOwedAmount - split.amount);
-  
-        // Update userBalance with the new amountOwed Map
-        userBalance.amountOwed = owedAmounts;
-  
-        // Save the updated balance
-        await userBalance.save();
-      }
-  
-      // Assuming this method handles reducing redundant transactions within the group
-      await this.reduceTransactions(group);
-      return true; // Indicates success
-    } catch (error) {
-      console.error('Error updating balances after transaction:', error);
-      return false; // Indicates failure
-    }
-  }
+    await this.balanceModel.deleteMany({group});
+    await this.balanceModel.insertMany(updatedBalances);
+
+}
+
+
 
   
   async getBalanceData(groupId) {

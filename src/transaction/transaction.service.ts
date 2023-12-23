@@ -16,14 +16,12 @@ export class TransactionService {
   async createTransaction(createTransactionDto) {
     const newTransaction = new this.transactionModel(createTransactionDto);
     await newTransaction.save();
-    await this.updateBalances(createTransactionDto);
+    await this.balanceService.updateBalancesAfterTransaction(createTransactionDto);
 
     return newTransaction;
   }
 
-  private async updateBalances(transactionDto) {
-    await this.balanceService.updateBalancesAfterTransaction(transactionDto);
-  }
+  
 
   getTransactionsByGroupId(groupId) {
     return this.transactionModel

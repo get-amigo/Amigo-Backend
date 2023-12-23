@@ -2,21 +2,25 @@ import { Schema } from 'mongoose';
 
 const BalanceSchema = new Schema(
   {
-    user: {
+    lender: {
       type: Schema.Types.ObjectId,
       ref: 'User',
+      required: true,
+    },
+    borrower: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    amount: {
+      type: Number,
       required: true,
     },
     group: {
       type: Schema.Types.ObjectId,
       ref: 'Group',
       required: true,
-    },
-    amountOwed: {
-      type: Map,
-      of: Number,
-      default: {},
-    },
+    }
   },
   { timestamps: true },
 );

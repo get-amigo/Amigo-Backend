@@ -22,6 +22,7 @@ const TransactionSchema = new Schema(
     },
     splitAmong: [
       {
+        _id: false,
         user: {
           type: Schema.Types.ObjectId,
           ref: 'User',
