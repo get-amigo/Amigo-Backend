@@ -16,9 +16,9 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
-  async signUp(@Body() user) {
+  async signUp(@Body() user, @Res() response: Response) {
     const userData = await this.authService.signUpUser(user);
-    return userData;
+    return this.authService.login(userData, response);
   }
 
   @Post('login')

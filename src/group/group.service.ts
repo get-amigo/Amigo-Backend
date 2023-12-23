@@ -49,10 +49,6 @@ export class GroupService {
         .populate('members', 'name') // Populate the 'members' field and select the 'name' field
         .exec();
   
-      if (!userGroups || userGroups.length === 0) {
-        throw new NotFoundException('No groups found for this user');
-      }
-  
       // Return the list of groups with the names of their members
       return userGroups;
     } catch (error) {
