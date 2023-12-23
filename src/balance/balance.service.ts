@@ -162,27 +162,50 @@ export class BalanceService {
     try {
       // Get the group and transaction details
       const { group, paidBy, splitAmong } = transactionDto;
-
+  
       // Update balances for each user in the group
       for (const split of splitAmong) {
         const user = split.user;
-        const userBalance = await this.balanceModel.findOne({ user, group });
-
-        // Update the user's balance
-        userBalance.amountOwed = userBalance.amountOwed || new Map();
-        userBalance.amountOwed.set(
-          paidBy.toString(),
-          (userBalance.amountOwed.get(paidBy.toString()) || 0) - split.amount,
-        );
-
+  
+        // Skip if the user is the one who paid, as a user can't owe money to themselves
+        if (paidBy.toString() === user.toString()) {
+          continue;
+        }
+  
+        let userBalance = await this.balanceModel.findOne({ user, group });
+  
+        // If userBalance doesn't exist, create a new one
+        if (!userBalance) {
+          userBalance = new this.balanceModel({
+            user,
+            group,
+            amountOwed: {} // Initialize an empty Map
+          });
+        }
+  
+        // Convert amountOwed to a JavaScript Map
+        const owedAmounts = new Map(userBalance.amountOwed);
+  
+        // Update the owed amount
+        const paidByIdString = paidBy.toString();
+        const currentOwedAmount = owedAmounts.get(paidByIdString) || 0;
+        owedAmounts.set(paidByIdString, currentOwedAmount - split.amount);
+  
+        // Update userBalance with the new amountOwed Map
+        userBalance.amountOwed = owedAmounts;
+  
         // Save the updated balance
         await userBalance.save();
       }
-      this.reduceTransactions(group);
+  
+      // Assuming this method handles reducing redundant transactions within the group
+      await this.reduceTransactions(group);
       return true; // Indicates success
     } catch (error) {
       console.error('Error updating balances after transaction:', error);
       return false; // Indicates failure
     }
   }
+  
+  
 }
