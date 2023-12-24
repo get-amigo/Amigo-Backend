@@ -24,8 +24,7 @@ export class GroupController {
   }
 
   @Get()
-  async getAllUserGroups(@Req() req: Request)
-  {
+  async getAllUserGroups(@Req() req: Request) {
     const { id } = req['user'];
     return this.groupService.getAllUserGroups(id);
   }
@@ -36,8 +35,8 @@ export class GroupController {
     return this.groupService.joinGroup(groupId, new Types.ObjectId(id));
   }
 
-  @Get(":id/transactions")
-  getAllTransactions(@Param('id') groupId){
+  @Get(':id/transactions')
+  getAllTransactions(@Param('id') groupId) {
     return this.groupService.getAllTransactions(groupId);
   }
 }

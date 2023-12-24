@@ -11,8 +11,12 @@ import { BalanceService } from 'src/balance/balance.service';
 import BalanceSchema from 'src/balance/balance.schema';
 
 @Module({
-  imports: [TransactionModule,BalanceModule ,MongooseModule.forFeature([GroupSchema,TransactionSchema,BalanceSchema])],
+  imports: [
+    TransactionModule,
+    BalanceModule,
+    MongooseModule.forFeature([GroupSchema, TransactionSchema, BalanceSchema]),
+  ],
   controllers: [GroupController],
-  providers: [GroupService,TransactionService,BalanceService],
+  providers: [GroupService, TransactionService, BalanceService],
 })
 export class GroupModule {}

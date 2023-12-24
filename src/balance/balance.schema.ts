@@ -20,7 +20,7 @@ const BalanceSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Group',
       required: true,
-    }
+    },
   },
   { timestamps: true },
 );

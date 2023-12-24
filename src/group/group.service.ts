@@ -5,14 +5,14 @@ import {
 } from '@nestjs/common';
 import GroupSchema from './group.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model,Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { TransactionService } from 'src/transaction/transaction.service';
 @Injectable()
 export class GroupService {
   constructor(
     @InjectModel(GroupSchema.name)
     private groupModel: Model<{ name: string; members: [string] }>,
-    private transactionService:TransactionService
+    private transactionService: TransactionService,
   ) {}
   create(createGroupDto) {
     const createdGroup = new this.groupModel(createGroupDto);
@@ -48,7 +48,7 @@ export class GroupService {
         .find({ members: { $in: [userId] } })
         .populate('members', 'name') // Populate the 'members' field and select the 'name' field
         .exec();
-  
+
       // Return the list of groups with the names of their members
       return userGroups;
     } catch (error) {
@@ -57,9 +57,8 @@ export class GroupService {
       throw error;
     }
   }
-  
 
-  async getAllTransactions(groupId){
+  async getAllTransactions(groupId) {
     return this.transactionService.getTransactionsByGroupId(groupId);
   }
 }

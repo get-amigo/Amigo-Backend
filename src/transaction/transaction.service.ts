@@ -16,25 +16,22 @@ export class TransactionService {
   async createTransaction(createTransactionDto) {
     const newTransaction = new this.transactionModel(createTransactionDto);
     await newTransaction.save();
-    await this.balanceService.updateBalancesAfterTransaction(createTransactionDto);
+    await this.balanceService.updateBalancesAfterTransaction(
+      createTransactionDto,
+    );
 
     return newTransaction;
   }
 
-  
-
   getTransactionsByGroupId(groupId) {
     return this.transactionModel
-        .find({ group: groupId })
-        .populate('paidBy', 'name')
-        .populate({
-            path: 'splitAmong.user',
-            select: 'name'
-        })
-        .sort({ date: -1 }) // Sort by date in descending order
-        .exec();
-}
-
-
-
+      .find({ group: groupId })
+      .populate('paidBy', 'name')
+      .populate({
+        path: 'splitAmong.user',
+        select: 'name',
+      })
+      .sort({ date: -1 }) // Sort by date in descending order
+      .exec();
+  }
 }

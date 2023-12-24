@@ -7,8 +7,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  async getUser(@Req() req: Request)
-  {
+  async getUser(@Req() req: Request) {
     const { id } = req['user'];
     return this.usersService.findById(id);
   }
