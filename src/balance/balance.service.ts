@@ -97,10 +97,13 @@ export class BalanceService {
     return optimizedTransactions;
 }
 
+ async fetchAndMinimizeTransaction(concatinatedTransactions=[])
+ {
+
+ }
+
   async updateBalancesAfterTransaction(transactionDto) {
     const { paidBy, splitAmong, group } = transactionDto;
-
-    // Create balances array from transactionDto
     const balances = splitAmong.reduce((acc, { user, amount }) => {
         if (paidBy !== user) {
             acc.push({

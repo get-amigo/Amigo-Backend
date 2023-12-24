@@ -1,9 +1,15 @@
 import { Injectable } from '@nestjs/common';
-
+import { Model } from 'mongoose';
+import PaymentSchema from './payment.schema';
+import { InjectModel } from '@nestjs/mongoose';
 @Injectable()
 export class PaymentService {
-  create(createPaymentDto) {
-    return 'This action adds a new payment';
+  constructor(
+    @InjectModel(PaymentSchema.name)
+    private paymentModel: Model<{payer:string,receiver:string,amount:number,group:string }>,
+  ) {}
+  async create(createPaymentDto) {
+    return await this.paymentModel.create(createPaymentDto);
   }
 
   findAll() {
