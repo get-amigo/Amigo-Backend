@@ -97,9 +97,13 @@ export class BalanceService {
     return optimizedTransactions;
 }
 
- async fetchAndMinimizeTransaction(concatinatedTransactions=[])
+ async fetchAndMinimizeTransaction(groupId,concatenatedTransactions=[])
  {
-
+  const savedBalances = await this.balanceModel.find({ groupId });
+  const combinedBalances = savedBalances.concat(concatenatedTransactions);
+  const updatedBalances=this.minimizeTransactions(combinedBalances);
+  await this.balanceModel.deleteMany({groupId});
+  return await this.balanceModel.insertMany(updatedBalances);
  }
 
   async updateBalancesAfterTransaction(transactionDto) {
@@ -113,16 +117,8 @@ export class BalanceService {
             });
         }
         return acc;
-    }, []);
-
-    const savedBalances = await this.balanceModel.find({ group });
-    const combinedBalances = savedBalances.concat(balances);
-    const updatedBalances=this.minimizeTransactions(combinedBalances);
-    updatedBalances.forEach(obj=>obj.group=group)
-  
-    await this.balanceModel.deleteMany({group});
-    await this.balanceModel.insertMany(updatedBalances);
-
+    }, []);  
+    return this.fetchAndMinimizeTransaction(group,balances);
 }
 
 
