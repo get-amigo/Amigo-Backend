@@ -1,12 +1,12 @@
 import { Schema } from 'mongoose';
+
 const UserSchema = new Schema(
   {
-    email: {
+    phoneNumber: {
       type: String,
       required: true,
-      unique: true,
     },
-    password: {
+    countryCode: {
       type: String,
       required: true,
     },
