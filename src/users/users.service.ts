@@ -22,4 +22,10 @@ export class UsersService {
   async findById(id) {
     return await this.userModel.findById(id).exec();
   }
+
+  async findUserPhoneNumber(phoneNumber,countryCode)
+  {
+    return await this.userModel.findOne({phoneNumber,countryCode}).exec();
+  }
+
 }

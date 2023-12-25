@@ -10,6 +10,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -21,8 +22,8 @@ export class AuthController {
   }
 
   @Post('verifyOTP')
-  async verifyOTP(@Body() otpBody) {
-    return this.authService.verifyOTP(otpBody);
+  async verifyOTP(@Body() otpBody,@Res() response) {
+    this.authService.verifyOTP(otpBody,response);
   }
 
 }

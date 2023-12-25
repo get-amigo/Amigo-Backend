@@ -11,13 +11,14 @@ const UserSchema = new Schema(
       required: true,
     },
     name: {
-      type: String,
-      required: true,
+      type: String
     },
   },
   {
     timestamps: true,
   },
 );
+
+UserSchema.index({ phoneNumber: 1, countryCode: 1 }, { unique: true });
 
 export default { name: 'User', schema: UserSchema };

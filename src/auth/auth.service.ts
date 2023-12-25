@@ -51,16 +51,21 @@ export class AuthService {
   return status;
   }
 
-  async verifyOTP(otpBody)
+  async verifyOTP(otpBody,response)
   {
-    const client=Twilio(process.env.TWILIO_ACCOUNT_SID,process.env.TWILIO_AUTH_TOKEN);
     const {phoneNumber,countryCode,otp}=otpBody;
+    const client=Twilio(process.env.TWILIO_ACCOUNT_SID,process.env.TWILIO_AUTH_TOKEN);
     const verificationToken=process.env.TWILIO_VERIFICATION_SID;
     const verificationCheck=await client.verify.v2
     .services(verificationToken)
     .verificationChecks.create({ to:  "+"+countryCode+phoneNumber, code: otp });
     const {status}=verificationCheck;
-    return {status};
+    if(status!="approved")
+    return response.json({status});
+    let user=await this.userService.findUserPhoneNumber(phoneNumber,countryCode);
+    if(!user)
+    user=await this.userService.create({phoneNumber,countryCode});
+    this.login(user,response);
   }
 
   async verifyUser(login) {
