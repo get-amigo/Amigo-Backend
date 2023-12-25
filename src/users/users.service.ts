@@ -23,9 +23,11 @@ export class UsersService {
     return await this.userModel.findById(id).exec();
   }
 
-  async findUserPhoneNumber(phoneNumber,countryCode)
-  {
-    return await this.userModel.findOne({phoneNumber,countryCode}).exec();
+  async findUserPhoneNumber(phoneNumber, countryCode) {
+    return await this.userModel.findOne({ phoneNumber, countryCode }).exec();
   }
 
+  async editName(id, name) {
+    return await this.userModel.findByIdAndUpdate(id, { name: name }).exec();
+  }
 }
