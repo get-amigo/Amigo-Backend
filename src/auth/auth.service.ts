@@ -3,12 +3,15 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { generalError } from 'src/utils/generalError';
+import Twilio from 'twilio';
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UsersService,
-    private jwtService: JwtService,
-  ) {}
+    private jwtService: JwtService
+  ) {
+
+  }
   async signUpUser(data) {
     data.password = await AuthService.hashPassword(data.password);
     const user = await this.userService.create(data);
@@ -37,6 +40,27 @@ export class AuthService {
       token,
       userData,
     });
+  }
+
+  async sendOTP({phoneNumber})
+  {
+    const client=Twilio(process.env.TWILIO_ACCOUNT_SID,process.env.TWILIO_AUTH_TOKEN);
+    const {status}=await client.verify.v2
+  .services(process.env.TWILIO_VERIFICATION_SID)
+  .verifications.create({ to: phoneNumber, channel: "sms" });
+  return status;
+  }
+
+  async verifyOTP(otpBody)
+  {
+    const client=Twilio(process.env.TWILIO_ACCOUNT_SID,process.env.TWILIO_AUTH_TOKEN);
+    const {phoneNumber,countryCode,otp}=otpBody;
+    const verificationToken=process.env.TWILIO_VERIFICATION_SID;
+    const verificationCheck=await client.verify.v2
+    .services(verificationToken)
+    .verificationChecks.create({ to:  "+"+countryCode+phoneNumber, code: otp });
+    const {status}=verificationCheck;
+    return {status};
   }
 
   async verifyUser(login) {

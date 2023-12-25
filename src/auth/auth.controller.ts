@@ -15,16 +15,14 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('signup')
-  async signUp(@Body() user, @Res() response: Response) {
-    const userData = await this.authService.signUpUser(user);
-    return this.authService.login(userData, response);
+  @Post('sendOTP')
+  async sendOTP(@Body() phoneNumber) {
+    return this.authService.sendOTP(phoneNumber);
   }
 
-  @Post('login')
-  @HttpCode(200)
-  async login(@Body() user, @Res() response: Response) {
-    const userData = await this.authService.verifyUser(user);
-    return this.authService.login(userData, response);
+  @Post('verifyOTP')
+  async verifyOTP(@Body() otpBody) {
+    return this.authService.verifyOTP(otpBody);
   }
+
 }
