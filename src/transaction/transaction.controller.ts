@@ -18,9 +18,9 @@ export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
 
   @Post()
-  createTransaction(@Body() createTransactionDto,@Req() req: Request) {
+  createTransaction(@Body() createTransactionDto, @Req() req: Request) {
     const { id } = req['user'];
-    createTransactionDto["creator"]=id;
+    createTransactionDto['creator'] = id;
     return this.transactionService.createTransaction(createTransactionDto);
   }
 }

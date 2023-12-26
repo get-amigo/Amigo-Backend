@@ -21,42 +21,44 @@ export class UsersService {
 
   async createUsersAndGetIds(phoneNumbers) {
     let userIds = [];
-  
+
     for (let i = 0; i < phoneNumbers.length; i++) {
-      let user = await this.findUserPhoneNumber(phoneNumbers[i].phoneNumber, phoneNumbers[i].countryCode);
-  
+      let user = await this.findUserPhoneNumber(
+        phoneNumbers[i].phoneNumber,
+        phoneNumbers[i].countryCode,
+      );
+
       // If the user doesn't exist, create a new one
       if (!user) {
-        const {phoneNumber,countryCode}=phoneNumbers[i];
+        const { phoneNumber, countryCode } = phoneNumbers[i];
         const newUser = new this.userModel({
           phoneNumber,
-          countryCode
+          countryCode,
         });
-  
+
         user = await newUser.save();
-        this.sendSMS(phoneNumbers,countryCode,"Join our app");
+        this.sendSMS(phoneNumbers, countryCode, 'Join our app');
       }
-  
+
       userIds.push(user._id);
     }
-  
+
     return userIds;
   }
-  
-  async sendSMS(phoneNumber,countryCode,message)
-  {
-    if(process.env.ENV=="production"){
+
+  async sendSMS(phoneNumber, countryCode, message) {
+    if (process.env.ENV == 'production') {
       const client = Twilio(
         process.env.TWILIO_ACCOUNT_SID,
         process.env.TWILIO_AUTH_TOKEN,
       );
       client.messages.create({
-        body: message,  // Text of the SMS
-        to: '+'+countryCode+phoneNumber,
-        from: process.env.TWILIO_PHONE_NUMBER          // Replace with a valid Twilio number
-    });
+        body: message, // Text of the SMS
+        to: '+' + countryCode + phoneNumber,
+        from: process.env.TWILIO_PHONE_NUMBER, // Replace with a valid Twilio number
+      });
+    }
   }
-}
 
   async findById(id) {
     return await this.userModel.findById(id).exec();

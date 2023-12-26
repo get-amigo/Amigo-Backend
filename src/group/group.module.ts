@@ -19,9 +19,14 @@ import { UsersService } from 'src/users/users.service';
     TransactionModule,
     BalanceModule,
     UsersModule,
-    MongooseModule.forFeature([GroupSchema, TransactionSchema, BalanceSchema,UsersSchema]),
+    MongooseModule.forFeature([
+      GroupSchema,
+      TransactionSchema,
+      BalanceSchema,
+      UsersSchema,
+    ]),
   ],
-  controllers: [GroupController,UsersController],
-  providers: [GroupService, TransactionService, BalanceService,UsersService],
+  controllers: [GroupController, UsersController],
+  providers: [GroupService, TransactionService, BalanceService, UsersService],
 })
 export class GroupModule {}

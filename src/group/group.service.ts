@@ -14,12 +14,17 @@ export class GroupService {
     @InjectModel(GroupSchema.name)
     private groupModel: Model<{ name: string; members: [string] }>,
     private transactionService: TransactionService,
-    private userService: UsersService
+    private userService: UsersService,
   ) {}
   async create(createGroupDto) {
-    const {members,name,phoneNumbers}=createGroupDto;
-    const newMemberIds=await this.userService.createUsersAndGetIds(phoneNumbers);
-    const createdGroup = new this.groupModel({members:members.concat(newMemberIds),name});
+    const { members, name, phoneNumbers } = createGroupDto;
+    const newMemberIds = await this.userService.createUsersAndGetIds(
+      phoneNumbers,
+    );
+    const createdGroup = new this.groupModel({
+      members: members.concat(newMemberIds),
+      name,
+    });
     return createdGroup.save();
   }
 

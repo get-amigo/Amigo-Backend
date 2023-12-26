@@ -27,6 +27,7 @@ export class TransactionService {
     return this.transactionModel
       .find({ group: groupId })
       .populate('paidBy', 'name')
+      .populate('creator', 'name')
       .populate({
         path: 'splitAmong.user',
         select: 'name',
