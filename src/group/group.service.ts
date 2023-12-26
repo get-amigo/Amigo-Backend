@@ -7,15 +7,19 @@ import GroupSchema from './group.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { TransactionService } from 'src/transaction/transaction.service';
+import { UsersService } from 'src/users/users.service';
 @Injectable()
 export class GroupService {
   constructor(
     @InjectModel(GroupSchema.name)
     private groupModel: Model<{ name: string; members: [string] }>,
     private transactionService: TransactionService,
+    private userService: UsersService
   ) {}
-  create(createGroupDto) {
-    const createdGroup = new this.groupModel(createGroupDto);
+  async create(createGroupDto) {
+    const {members,name,phoneNumbers}=createGroupDto;
+    const newMemberIds=await this.userService.createUsersAndGetIds(phoneNumbers);
+    const createdGroup = new this.groupModel({members:members.concat(newMemberIds),name});
     return createdGroup.save();
   }
 

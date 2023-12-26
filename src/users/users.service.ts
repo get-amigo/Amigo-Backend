@@ -19,6 +19,30 @@ export class UsersService {
     return await this.userModel.findOne({ email }).exec();
   }
 
+  async createUsersAndGetIds(phoneNumbers) {
+    let userIds = [];
+  
+    for (let i = 0; i < phoneNumbers.length; i++) {
+      let user = await this.findUserPhoneNumber(phoneNumbers[i].phoneNumber, phoneNumbers[i].countryCode);
+  
+      // If the user doesn't exist, create a new one
+      if (!user) {
+        const newUser = new this.userModel({
+          phoneNumber: phoneNumbers[i].phoneNumber,
+          countryCode: phoneNumbers[i].countryCode
+        });
+  
+        user = await newUser.save();
+      }
+  
+      // Add the user's ID to the list
+      userIds.push(user._id);
+    }
+  
+    return userIds;
+  }
+  
+
   async findById(id) {
     return await this.userModel.findById(id).exec();
   }
