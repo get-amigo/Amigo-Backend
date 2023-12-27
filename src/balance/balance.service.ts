@@ -19,8 +19,24 @@ export class BalanceService {
     return newBalance.save();
   }
 
-  async findAll() {
-    return this.balanceModel.find().exec();
+  async  findAll(userId) {
+    try {
+      const balances = await this.balanceModel.find({
+        $or: [{ lender: userId }, { borrower: userId }]
+      })
+      .populate({
+        path: 'group',
+        select: 'name' // Populating only the name of the group
+      })
+      .populate('lender', 'name') // Optional: Populate lender name
+      .populate('borrower', 'name') // Optional: Populate borrower name
+      .exec();
+  
+      return balances;
+    } catch (error) {
+      console.error(error);
+      throw error; // Rethrow the error for further handling
+    }
   }
 
   async findOne(id: string) {
@@ -125,7 +141,7 @@ export class BalanceService {
     return this.fetchAndMinimizeTransaction(group, balances);
   }
 
-  async getBalanceData(groupId) {
+  async getBalanceDataByGroup(groupId) {
     return await this.balanceModel
       .find({ group: groupId })
       .populate('borrower', 'name')

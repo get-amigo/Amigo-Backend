@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { BalanceService } from './balance.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -21,12 +22,13 @@ export class BalanceController {
   }
 
   @Get()
-  findAll() {
-    return this.balanceService.findAll();
+  findAll(@Req() req: Request) {
+    const { id } = req['user'];
+    return this.balanceService.findAll(id);
   }
 
   @Get(':id')
-  findAllBalanceGroup(@Param('id') groupId) {
-    return this.balanceService.getBalanceData(groupId);
+  findAllBalanceGroup(@Param('id')  groupId) {
+    return this.balanceService.getBalanceDataByGroup(groupId);
   }
 }
