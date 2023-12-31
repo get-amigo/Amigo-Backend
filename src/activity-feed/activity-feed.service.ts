@@ -8,11 +8,13 @@ export class ActivityFeedService {
   @WebSocketServer() server;
   constructor(
     @InjectModel(ActivityFeedSchema.name)
-    private balanceModel: Model<typeof ActivityFeedSchema>,
+    private activityModel: Model<typeof ActivityFeedSchema>,
   ) {}
-  createActivity()
+  createActivity(createActivityDto)
   {
-
+    const newActivity = new this.activityModel(createActivityDto);
+    newActivity.save();
+    this.server.emit(createActivityDto["group"], createActivityDto);
   }
 
   findAll() {
