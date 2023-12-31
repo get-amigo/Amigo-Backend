@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { CreateActivityFeedDto } from './dto/create-activity-feed.dto';
-import { UpdateActivityFeedDto } from './dto/update-activity-feed.dto';
-
+import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import ActivityFeedSchema from './activity-feed.schema';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 @Injectable()
 export class ActivityFeedService {
-  create(createActivityFeedDto: CreateActivityFeedDto) {
-    return 'This action adds a new activityFeed';
+  @WebSocketServer() server;
+  constructor(
+    @InjectModel(ActivityFeedSchema.name)
+    private balanceModel: Model<typeof ActivityFeedSchema>,
+  ) {}
+  createActivity()
+  {
+
   }
 
   findAll() {
@@ -16,7 +23,7 @@ export class ActivityFeedService {
     return `This action returns a #${id} activityFeed`;
   }
 
-  update(id: number, updateActivityFeedDto: UpdateActivityFeedDto) {
+  update(id: number, updateActivityFeedDto) {
     return `This action updates a #${id} activityFeed`;
   }
 
