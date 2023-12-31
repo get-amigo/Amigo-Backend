@@ -23,4 +23,9 @@ export class TransactionController {
     createTransactionDto['creator'] = id;
     return this.transactionService.createTransaction(createTransactionDto);
   }
+
+  @Delete(':id')
+  deleteTransaction(@Req() req: Request, @Param('id') transactionId) {
+    return this.transactionService.deleteTransaction(transactionId);
+  }
 }

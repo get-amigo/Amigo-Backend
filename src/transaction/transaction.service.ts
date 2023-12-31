@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import TransactionSchema from './transaction.schema';
@@ -22,6 +22,26 @@ export class TransactionService {
 
     return newTransaction;
   }
+  
+
+  async deleteTransaction(transactionId: string) {
+    // Find the transaction by its ID
+    const transaction = await this.transactionModel.findById(transactionId).exec();
+    if (!transaction) {
+      throw new NotFoundException(`Transaction with ID ${transactionId} not found`);
+    }
+  
+    // Delete the transaction
+    await this.transactionModel.findByIdAndDelete(transactionId).exec();
+  
+    // Update balances after the transaction is deleted
+    // Assuming a method like this exists in your BalanceService
+    await this.balanceService.updateBalancesAfterTransactionDeletion(transaction);
+  
+    // Return some confirmation message or the deleted transaction
+    return transaction;
+  }
+  
 
   getTransactionsByGroupId(groupId) {
     return this.transactionModel

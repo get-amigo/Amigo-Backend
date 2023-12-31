@@ -141,6 +141,26 @@ export class BalanceService {
     return this.fetchAndMinimizeTransaction(group, balances);
   }
 
+  async updateBalancesAfterTransactionDeletion(transaction) {
+    const { paidBy, splitAmong, group } = transaction;
+  
+    // Create balance adjustments to reverse the deleted transaction
+    const reverseBalances = splitAmong.reduce((acc, { user, amount }) => {
+      if (paidBy !== user) {
+        acc.push({
+          lender: user, // Reversing the lender and borrower
+          borrower: paidBy,
+          amount, // The amount remains the same
+        });
+      }
+      return acc;
+    }, []);
+  
+    // Update the balances in the group by processing these reverse balances
+    return this.fetchAndMinimizeTransaction(group, reverseBalances);
+  }
+  
+
   async getBalanceDataByGroup(groupId) {
     return await this.balanceModel
       .find({ group: groupId })
