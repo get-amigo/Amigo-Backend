@@ -9,6 +9,7 @@ import { GroupModule } from './group/group.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { BalanceModule } from './balance/balance.module';
 import { PaymentModule } from './payment/payment.module';
+import { ActivityFeedModule } from './activity-feed/activity-feed.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PaymentModule } from './payment/payment.module';
     TransactionModule,
     BalanceModule,
     PaymentModule,
+    ActivityFeedModule,
   ],
   controllers: [AppController],
   providers: [AppService],
