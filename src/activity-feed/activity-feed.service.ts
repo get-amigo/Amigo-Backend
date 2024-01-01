@@ -27,21 +27,17 @@ export class ActivityFeedService {
       .find(query)
       .limit(size)
       .sort({ createdAt: -1 }) // Sorting by creation time in descending order
-      .populate('creator')
-      .populate('group')
       .exec();
   
   
     for (let activity of activities) {
       if (activity.onModel) {
-        // Directly await the result of the populate call
         await this.activityModel.populate(activity, {
           path: 'relatedId',
           model: activity.onModel
         });
       }
     }
-  
     return activities;
   }
   
