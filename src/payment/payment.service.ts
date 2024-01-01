@@ -15,22 +15,22 @@ export class PaymentService {
       group: string;
     }>,
     private balanceService: BalanceService,
-    private activityFeedService: ActivityFeedService
+    private activityFeedService: ActivityFeedService,
   ) {}
-  async create(createPaymentDto,creator) {
+  async create(createPaymentDto, creator) {
     const { payer, receiver, amount, group } = createPaymentDto;
     const transaction = {
       lender: payer,
       borrower: receiver,
       amount: amount,
     };
-    const payment=await this.paymentModel.create(createPaymentDto)
+    const payment = await this.paymentModel.create(createPaymentDto);
     this.activityFeedService.createActivity({
-      activityType:"payment",
+      activityType: 'payment',
       creator,
       group,
-      relatedId:payment._id,
-      onModel:"Payment"
+      relatedId: payment._id,
+      onModel: 'Payment',
     });
     this.balanceService.fetchAndMinimizeTransaction(group, [transaction]);
     return payment;

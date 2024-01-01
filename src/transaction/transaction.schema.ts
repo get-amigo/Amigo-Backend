@@ -20,9 +20,7 @@ const TransactionSchema = new Schema(
       ref: 'Group',
       required: true,
     },
-    type: {type: String,
-      required: true,
-    },
+    type: { type: String, required: true },
     splitAmong: [
       {
         _id: false,

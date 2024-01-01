@@ -10,20 +10,22 @@ import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
 export class TransactionService {
   constructor(
     @InjectModel(TransactionSchema.name)
-    private transactionModel: Model<{creator,group}>,
+    private transactionModel: Model<{ creator; group }>,
     private balanceService: BalanceService, // Inject BalanceService or similar functionality
-    private activityFeedService: ActivityFeedService
+    private activityFeedService: ActivityFeedService,
   ) {}
 
   async createTransaction(createTransactionDto) {
     const newTransaction = new this.transactionModel(createTransactionDto);
     await newTransaction.save();
-    const {creator,group,_id:relatedId}=newTransaction;
+    const { creator, group, _id: relatedId } = newTransaction;
     this.activityFeedService.createActivity({
-      creator,group,relatedId,
-      activityType:"transaction",
-      onModel:"Transaction",
-      description:"transaction created"
+      creator,
+      group,
+      relatedId,
+      activityType: 'transaction',
+      onModel: 'Transaction',
+      description: 'transaction created',
     });
     await this.balanceService.updateBalancesAfterTransaction(
       createTransactionDto,
@@ -31,26 +33,30 @@ export class TransactionService {
 
     return newTransaction;
   }
-  
 
   async deleteTransaction(transactionId: string) {
     // Find the transaction by its ID
-    const transaction = await this.transactionModel.findById(transactionId).exec();
+    const transaction = await this.transactionModel
+      .findById(transactionId)
+      .exec();
     if (!transaction) {
-      throw new NotFoundException(`Transaction with ID ${transactionId} not found`);
+      throw new NotFoundException(
+        `Transaction with ID ${transactionId} not found`,
+      );
     }
-  
+
     // Delete the transaction
     await this.transactionModel.findByIdAndDelete(transactionId).exec();
-  
+
     // Update balances after the transaction is deleted
     // Assuming a method like this exists in your BalanceService
-    await this.balanceService.updateBalancesAfterTransactionDeletion(transaction);
-  
+    await this.balanceService.updateBalancesAfterTransactionDeletion(
+      transaction,
+    );
+
     // Return some confirmation message or the deleted transaction
     return transaction;
   }
-  
 
   getTransactionsByGroupId(groupId) {
     return this.transactionModel

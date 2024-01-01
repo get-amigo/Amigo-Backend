@@ -26,10 +26,16 @@ import ActivityFeedSchema from 'src/activity-feed/activity-feed.schema';
       TransactionSchema,
       BalanceSchema,
       UsersSchema,
-      ActivityFeedSchema
+      ActivityFeedSchema,
     ]),
   ],
   controllers: [GroupController, UsersController],
-  providers: [GroupService, TransactionService, BalanceService, UsersService,ActivityFeedService],
+  providers: [
+    GroupService,
+    TransactionService,
+    BalanceService,
+    UsersService,
+    ActivityFeedService,
+  ],
 })
 export class GroupModule {}

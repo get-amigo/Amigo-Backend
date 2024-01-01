@@ -19,19 +19,20 @@ export class BalanceService {
     return newBalance.save();
   }
 
-  async  findAll(userId) {
+  async findAll(userId) {
     try {
-      const balances = await this.balanceModel.find({
-        $or: [{ lender: userId }, { borrower: userId }]
-      })
-      .populate({
-        path: 'group',
-        select: 'name' // Populating only the name of the group
-      })
-      .populate('lender', 'name') // Optional: Populate lender name
-      .populate('borrower', 'name') // Optional: Populate borrower name
-      .exec();
-  
+      const balances = await this.balanceModel
+        .find({
+          $or: [{ lender: userId }, { borrower: userId }],
+        })
+        .populate({
+          path: 'group',
+          select: 'name', // Populating only the name of the group
+        })
+        .populate('lender', 'name') // Optional: Populate lender name
+        .populate('borrower', 'name') // Optional: Populate borrower name
+        .exec();
+
       return balances;
     } catch (error) {
       console.error(error);
@@ -143,7 +144,7 @@ export class BalanceService {
 
   async updateBalancesAfterTransactionDeletion(transaction) {
     const { paidBy, splitAmong, group } = transaction;
-  
+
     // Create balance adjustments to reverse the deleted transaction
     const reverseBalances = splitAmong.reduce((acc, { user, amount }) => {
       if (paidBy !== user) {
@@ -155,11 +156,10 @@ export class BalanceService {
       }
       return acc;
     }, []);
-  
+
     // Update the balances in the group by processing these reverse balances
     return this.fetchAndMinimizeTransaction(group, reverseBalances);
   }
-  
 
   async getBalanceDataByGroup(groupId) {
     return await this.balanceModel

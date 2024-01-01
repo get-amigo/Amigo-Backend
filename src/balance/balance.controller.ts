@@ -28,7 +28,7 @@ export class BalanceController {
   }
 
   @Get(':id')
-  findAllBalanceGroup(@Param('id')  groupId) {
+  findAllBalanceGroup(@Param('id') groupId) {
     return this.balanceService.getBalanceDataByGroup(groupId);
   }
 }

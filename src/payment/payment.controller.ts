@@ -21,7 +21,7 @@ export class PaymentController {
   @Post()
   create(@Body() createPaymentDto, @Req() req: Request) {
     const { id } = req['user'];
-    return this.paymentService.create(createPaymentDto,id);
+    return this.paymentService.create(createPaymentDto, id);
   }
 
   @Get()

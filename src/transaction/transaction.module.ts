@@ -11,9 +11,13 @@ import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
 @Module({
   imports: [
     BalanceModule,
-    MongooseModule.forFeature([TransactionSchema, BalanceSchema,ActivityFeedSchema]),
+    MongooseModule.forFeature([
+      TransactionSchema,
+      BalanceSchema,
+      ActivityFeedSchema,
+    ]),
   ],
   controllers: [TransactionController],
-  providers: [TransactionService, BalanceService,ActivityFeedService],
+  providers: [TransactionService, BalanceService, ActivityFeedService],
 })
 export class TransactionModule {}
