@@ -20,10 +20,7 @@ const PaymentSchema = new Schema(
     amount: {
       type: Number,
       required: true,
-    },
-    description: {
-      type: String,
-    },
+    }
   },
   {
     timestamps: true,

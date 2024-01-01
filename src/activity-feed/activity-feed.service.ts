@@ -44,10 +44,15 @@ export class ActivityFeedService {
               }
             ]
           });
-        } else {
-          // Handle the case where the model is not 'Transaction'
-          // You can add your logic here, or if there's nothing to do, just continue to the next iteration
-          continue;
+        } else if(activity.onModel && activity.onModel === 'payment') {
+          await this.activityModel.populate(activity, {
+            path: 'relatedId',
+            model: activity.onModel,
+            populate: [
+              { path: 'payer', select: 'name' },
+              { path: 'receiver', select: 'name' }
+            ]
+          });
         }
       }
       
