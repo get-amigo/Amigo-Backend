@@ -10,6 +10,7 @@ import { TransactionModule } from './transaction/transaction.module';
 import { BalanceModule } from './balance/balance.module';
 import { PaymentModule } from './payment/payment.module';
 import { ActivityFeedModule } from './activity-feed/activity-feed.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ActivityFeedModule } from './activity-feed/activity-feed.module';
     BalanceModule,
     PaymentModule,
     ActivityFeedModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
