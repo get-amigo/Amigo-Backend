@@ -4,18 +4,27 @@ import { Model } from 'mongoose';
 import TransactionSchema from './transaction.schema';
 // Assuming there's a service or function to handle balance updates
 import { BalanceService } from 'src/balance/balance.service'; // Import BalanceService or similar functionality
+import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
 
 @Injectable()
 export class TransactionService {
   constructor(
     @InjectModel(TransactionSchema.name)
-    private transactionModel: Model<typeof TransactionSchema>,
+    private transactionModel: Model<{creator,group}>,
     private balanceService: BalanceService, // Inject BalanceService or similar functionality
+    private activityFeedService: ActivityFeedService
   ) {}
 
   async createTransaction(createTransactionDto) {
     const newTransaction = new this.transactionModel(createTransactionDto);
     await newTransaction.save();
+    const {creator,group,_id:relatedId}=newTransaction;
+    this.activityFeedService.createActivity({
+      creator,group,relatedId,
+      activityType:"transaction",
+      onModel:"Transaction",
+      description:"transaction created"
+    });
     await this.balanceService.updateBalancesAfterTransaction(
       createTransactionDto,
     );

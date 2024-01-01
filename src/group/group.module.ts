@@ -13,6 +13,8 @@ import UsersSchema from 'src/users/users.schema';
 import { UsersModule } from 'src/users/users.module';
 import { UsersController } from 'src/users/users.controller';
 import { UsersService } from 'src/users/users.service';
+import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
+import ActivityFeedSchema from 'src/activity-feed/activity-feed.schema';
 
 @Module({
   imports: [
@@ -24,9 +26,10 @@ import { UsersService } from 'src/users/users.service';
       TransactionSchema,
       BalanceSchema,
       UsersSchema,
+      ActivityFeedSchema
     ]),
   ],
   controllers: [GroupController, UsersController],
-  providers: [GroupService, TransactionService, BalanceService, UsersService],
+  providers: [GroupService, TransactionService, BalanceService, UsersService,ActivityFeedService],
 })
 export class GroupModule {}
