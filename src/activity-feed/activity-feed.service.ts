@@ -30,14 +30,28 @@ export class ActivityFeedService {
       .exec();
   
   
-    for (let activity of activities) {
-      if (activity.onModel) {
-        await this.activityModel.populate(activity, {
-          path: 'relatedId',
-          model: activity.onModel
-        });
+      for (let activity of activities) {
+        if (activity.onModel && activity.onModel === 'Transaction') {
+          await this.activityModel.populate(activity, {
+            path: 'relatedId',
+            model: activity.onModel,
+            populate: [
+              { path: 'paidBy', select: 'name' },
+              { path: 'creator', select: 'name' },
+              {
+                path: 'splitAmong.user',
+                select: 'name',
+              }
+            ]
+          });
+        } else {
+          // Handle the case where the model is not 'Transaction'
+          // You can add your logic here, or if there's nothing to do, just continue to the next iteration
+          continue;
+        }
       }
-    }
+      
+      
     return activities;
   }
   
