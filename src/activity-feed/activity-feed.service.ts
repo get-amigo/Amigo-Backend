@@ -25,6 +25,7 @@ export class ActivityFeedService {
     let activities = await this.activityModel
       .find(query)
       .limit(size)
+      .populate('creator', 'name')
       .sort({ createdAt: -1 }) // Sorting by creation time in descending order
       .exec();
 
