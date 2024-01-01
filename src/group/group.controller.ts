@@ -35,6 +35,16 @@ export class GroupController {
     return this.groupService.joinGroup(groupId, new Types.ObjectId(id));
   }
 
+  @Post(':id/chat')
+  createChat(@Req() req: Request, @Param('id') groupId, @Body() message) {
+    const { id } = req['user'];
+    return this.groupService.createChat(
+      message,
+      groupId,
+      new Types.ObjectId(id),
+    );
+  }
+
   @Get(':id/transactions')
   getAllTransactions(@Param('id') groupId) {
     return this.groupService.getAllTransactions(groupId);

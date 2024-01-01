@@ -8,6 +8,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { TransactionService } from 'src/transaction/transaction.service';
 import { UsersService } from 'src/users/users.service';
+import { ChatService } from 'src/chat/chat.service';
+import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
 @Injectable()
 export class GroupService {
   constructor(
@@ -15,6 +17,8 @@ export class GroupService {
     private groupModel: Model<{ name: string; members: [string] }>,
     private transactionService: TransactionService,
     private userService: UsersService,
+    private chatService: ChatService,
+    private activityFeedService: ActivityFeedService,
   ) {}
   async create(createGroupDto) {
     const { members, name, phoneNumbers } = createGroupDto;
@@ -26,6 +30,17 @@ export class GroupService {
       name,
     });
     return createdGroup.save();
+  }
+
+  createChat(message, group, creator) {
+    const chat = this.chatService.create(message);
+    return this.activityFeedService.createActivity({
+      activityType: 'chat',
+      creator,
+      group,
+      relatedId: chat._id,
+      onModel: 'Chat',
+    });
   }
 
   async joinGroup(groupId, userId) {

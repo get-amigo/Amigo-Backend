@@ -10,8 +10,9 @@ export class ChatService {
     private chatModel: Model<typeof ChatSchema>,
   ) {}
   create(createChatDto) {
-    const chat=new this.chatModel(createChatDto);
+    const chat = new this.chatModel(createChatDto);
     chat.save();
+    return chat;
   }
 
   findAll() {

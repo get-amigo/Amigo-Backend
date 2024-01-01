@@ -24,5 +24,4 @@ export class ActivityFeedDto {
   @IsString()
   @IsOptional()
   description?: string;
-
 }

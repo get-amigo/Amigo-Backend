@@ -11,8 +11,7 @@ export class ActivityFeedService {
     @InjectModel(ActivityFeedSchema.name)
     private activityModel: Model<ActivityFeedDto>,
   ) {}
-  createActivity(createActivityDto)
-  {
+  createActivity(createActivityDto) {
     const newActivity = new this.activityModel(createActivityDto);
     newActivity.save();
   }
@@ -20,49 +19,43 @@ export class ActivityFeedService {
   async findByGroup(groupId, lastActivityTime, size) {
     let query = { group: groupId };
     if (lastActivityTime) {
-      query["createdAt"] = { $lt: new Date(lastActivityTime) };
+      query['createdAt'] = { $lt: new Date(lastActivityTime) };
     }
-  
+
     let activities = await this.activityModel
       .find(query)
       .limit(size)
       .sort({ createdAt: -1 }) // Sorting by creation time in descending order
       .exec();
-  
-  
-      for (let activity of activities) {
-        if (activity.onModel && activity.onModel === 'Transaction') {
-          await this.activityModel.populate(activity, {
-            path: 'relatedId',
-            model: activity.onModel,
-            populate: [
-              { path: 'paidBy', select: 'name' },
-              { path: 'creator', select: 'name' },
-              {
-                path: 'splitAmong.user',
-                select: 'name',
-              }
-            ]
-          });
-        } else if(activity.onModel && activity.onModel === 'Payment') {
-          await this.activityModel.populate(activity, {
-            path: 'relatedId',
-            model: activity.onModel,
-            populate: [
-              { path: 'payer', select: 'name' },
-              { path: 'receiver', select: 'name' },
-            ]
-          });
-        }
+
+    for (let activity of activities) {
+      if (activity.onModel && activity.onModel === 'Transaction') {
+        await this.activityModel.populate(activity, {
+          path: 'relatedId',
+          model: activity.onModel,
+          populate: [
+            { path: 'paidBy', select: 'name' },
+            { path: 'creator', select: 'name' },
+            {
+              path: 'splitAmong.user',
+              select: 'name',
+            },
+          ],
+        });
+      } else if (activity.onModel && activity.onModel === 'Payment') {
+        await this.activityModel.populate(activity, {
+          path: 'relatedId',
+          model: activity.onModel,
+          populate: [
+            { path: 'payer', select: 'name' },
+            { path: 'receiver', select: 'name' },
+          ],
+        });
       }
-      
-      
+    }
+
     return activities;
   }
-  
-  
-  
-  
 
   findAll() {
     return `This action returns all activityFeed`;

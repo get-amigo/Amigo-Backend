@@ -15,18 +15,22 @@ import { UsersController } from 'src/users/users.controller';
 import { UsersService } from 'src/users/users.service';
 import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
 import ActivityFeedSchema from 'src/activity-feed/activity-feed.schema';
-
+import { ChatService } from 'src/chat/chat.service';
+import { ChatModule } from 'src/chat/chat.module';
+import ChatSchema from 'src/chat/chat.schema';
 @Module({
   imports: [
     TransactionModule,
     BalanceModule,
     UsersModule,
+    ChatModule,
     MongooseModule.forFeature([
       GroupSchema,
       TransactionSchema,
       BalanceSchema,
       UsersSchema,
       ActivityFeedSchema,
+      ChatSchema,
     ]),
   ],
   controllers: [GroupController, UsersController],
@@ -36,6 +40,7 @@ import ActivityFeedSchema from 'src/activity-feed/activity-feed.schema';
     BalanceService,
     UsersService,
     ActivityFeedService,
+    ChatService,
   ],
 })
 export class GroupModule {}

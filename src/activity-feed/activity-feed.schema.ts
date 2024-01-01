@@ -5,7 +5,7 @@ const ActivityFeedSchema = new Schema(
     activityType: {
       type: String,
       required: true,
-      enum: ['transaction', 'payment'],
+      enum: ['transaction', 'payment', 'chat'],
     },
     creator: {
       type: Schema.Types.ObjectId,
@@ -25,7 +25,7 @@ const ActivityFeedSchema = new Schema(
     onModel: {
       type: String,
       required: false,
-      enum: ['Transaction', 'Payment'],
+      enum: ['Transaction', 'Payment', 'Chat'],
     },
     description: {
       type: String,
