@@ -52,6 +52,12 @@ export class ActivityFeedService {
           ],
         });
       }
+      else if (activity.onModel && activity.onModel === 'Chat') {
+        await this.activityModel.populate(activity, {
+          path: 'relatedId',
+          model: activity.onModel
+        });
+      }
     }
 
     return activities;
