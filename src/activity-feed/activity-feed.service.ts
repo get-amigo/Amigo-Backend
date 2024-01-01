@@ -51,7 +51,6 @@ export class ActivityFeedService {
             populate: [
               { path: 'payer', select: 'name' },
               { path: 'receiver', select: 'name' },
-              { path: 'creator', select: 'name' },
             ]
           });
         }
