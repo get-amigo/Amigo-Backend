@@ -23,13 +23,14 @@ export class ActivityFeedController {
   }
 
   @Get(':groupId')
-  findByGroup(
-    @Param('groupId') groupId: string,
-    @Query('pageNo') pageNo: number = 1, // Default page number is set to 1
-    @Query('size') size: number = 10, // Default page size is set to 10
-  ) {
-    return this.activityFeedService.findByGroup(groupId, pageNo, size);
-  }
+findByGroup(
+  @Param('groupId') groupId: string,
+  @Query('lastActivityTime') lastActivityTime: string, // Receive last activity time
+  @Query('size') size: number = 10, // Default page size is set to 10
+) {
+  return this.activityFeedService.findByGroup(groupId, lastActivityTime, size);
+}
+
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateActivityFeedDto) {
