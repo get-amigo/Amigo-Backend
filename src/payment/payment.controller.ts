@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { UsersController } from 'src/users/users.controller';
@@ -18,8 +19,9 @@ export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @Post()
-  create(@Body() createPaymentDto) {
-    return this.paymentService.create(createPaymentDto);
+  create(@Body() createPaymentDto, @Req() req: Request) {
+    const { id } = req['user'];
+    return this.paymentService.create(createPaymentDto,id);
   }
 
   @Get()

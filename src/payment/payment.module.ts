@@ -6,13 +6,15 @@ import PaymentSchema from './payment.schema';
 import { BalanceService } from 'src/balance/balance.service';
 import { BalanceModule } from 'src/balance/balance.module';
 import BalanceSchema from 'src/balance/balance.schema';
+import ActivityFeedSchema from 'src/activity-feed/activity-feed.schema';
+import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
 
 @Module({
   imports: [
     BalanceModule,
-    MongooseModule.forFeature([PaymentSchema, BalanceSchema]),
+    MongooseModule.forFeature([PaymentSchema, BalanceSchema,ActivityFeedSchema]),
   ],
   controllers: [PaymentController],
-  providers: [PaymentService, BalanceService],
+  providers: [PaymentService, BalanceService,ActivityFeedService],
 })
 export class PaymentModule {}

@@ -3,6 +3,7 @@ import { Model } from 'mongoose';
 import PaymentSchema from './payment.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { BalanceService } from 'src/balance/balance.service';
+import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
 @Injectable()
 export class PaymentService {
   constructor(
@@ -14,16 +15,25 @@ export class PaymentService {
       group: string;
     }>,
     private balanceService: BalanceService,
+    private activityFeedService: ActivityFeedService
   ) {}
-  async create(createPaymentDto) {
+  async create(createPaymentDto,creator) {
     const { payer, receiver, amount, group } = createPaymentDto;
     const transaction = {
       lender: payer,
       borrower: receiver,
       amount: amount,
     };
+    const payment=await this.paymentModel.create(createPaymentDto)
+    this.activityFeedService.createActivity({
+      activityType:"payment",
+      creator,
+      group,
+      relatedId:payment._id,
+      onModel:"Payment"
+    });
     this.balanceService.fetchAndMinimizeTransaction(group, [transaction]);
-    return await this.paymentModel.create(createPaymentDto);
+    return payment;
   }
 
   findAll() {
