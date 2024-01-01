@@ -44,13 +44,14 @@ export class ActivityFeedService {
               }
             ]
           });
-        } else if(activity.onModel && activity.onModel === 'payment') {
+        } else if(activity.onModel && activity.onModel === 'Payment') {
           await this.activityModel.populate(activity, {
             path: 'relatedId',
             model: activity.onModel,
             populate: [
               { path: 'payer', select: 'name' },
-              { path: 'receiver', select: 'name' }
+              { path: 'receiver', select: 'name' },
+              { path: 'creator', select: 'name' },
             ]
           });
         }
