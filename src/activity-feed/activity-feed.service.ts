@@ -69,7 +69,7 @@ export class ActivityFeedService {
   }
 
   async deleteByRelationId(relatedId){
-    this.activityModel.deleteOne({relatedId});
+    await this.activityModel.deleteOne({relatedId});
   }
 
   findOne(id: number) {
