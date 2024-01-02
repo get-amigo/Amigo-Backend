@@ -44,60 +44,6 @@ export class GroupService {
   }
 
 
-  async search(size, page, searchString, userId) {
-    try {
-      const skip = (page - 1) * size;
-  
-      const results = await this.groupModel.aggregate([
-        // Match groups where the user is a member and the name matches the searchString
-        { $match: { 
-            name: { $regex: searchString, $options: 'i' }, 
-            members: userId 
-          } 
-        },
-        // Lookup to join with transactions
-        { $lookup: {
-            from: "transactions", 
-            let: { groupId: "$_id" },
-            pipeline: [
-              { $match: {
-                  $expr: { $eq: ["$group", "$$groupId"] },
-                  description: { $regex: searchString, $options: 'i' },
-                  $or: [
-                    { paidBy: userId },
-                    { 'splitAmong.user': userId }
-                  ]
-                }
-              },
-              { $limit: size }
-            ],
-            as: "relatedTransactions"
-          } 
-        },
-        // Lookup to join with users (assuming the collection name is 'users')
-        { $lookup: {
-            from: "users",
-            let: { memberIds: "$members" },
-            pipeline: [
-              { $match: {
-                  $expr: { $in: ["$_id", "$$memberIds"] },
-                  name: { $regex: searchString, $options: 'i' }
-                }
-              }
-            ],
-            as: "memberDetails"
-          }
-        },
-        { $skip: skip },
-        { $limit: size }
-      ]);
-  
-      return results;
-    } catch (error) {
-      console.error('Error occurred in search:', error);
-      throw error;
-    }
-  }
   
 
   async joinGroup(groupId, userId) {
