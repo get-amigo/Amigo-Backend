@@ -66,6 +66,7 @@ export class TransactionService {
       );
     }
 
+    await this.activityFeedService.deleteByRelationId(transactionId);
     // Delete the transaction
     await this.transactionModel.findByIdAndDelete(transactionId).exec();
 

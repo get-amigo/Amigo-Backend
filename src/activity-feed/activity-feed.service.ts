@@ -68,6 +68,10 @@ export class ActivityFeedService {
     return `This action returns all activityFeed`;
   }
 
+  async deleteByRelationId(relatedId){
+    this.activityModel.deleteOne({relatedId});
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} activityFeed`;
   }
