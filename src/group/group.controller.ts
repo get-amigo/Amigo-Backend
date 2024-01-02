@@ -6,6 +6,7 @@ import {
   Param,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -28,6 +29,13 @@ export class GroupController {
     const { id } = req['user'];
     return this.groupService.getAllUserGroups(id);
   }
+
+  @Get("search")
+async search(@Req() req: Request, @Query('size') size: number, @Query('page') page: number, @Query('searchString') searchString: string) {
+  const { id } = req['user'];
+  return this.groupService.search(size,page,searchString,id);
+}
+
 
   @Post(':id/join')
   joinGroup(@Req() req: Request, @Param('id') groupId) {
