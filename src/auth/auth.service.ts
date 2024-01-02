@@ -71,10 +71,10 @@ export class AuthService {
     }
     let user = await this.userService.findUserPhoneNumber(
       phoneNumber,
-      countryCode.replace("+", ""),
+      countryCode
     );
     if (!user)
-      user = await this.userService.create({ phoneNumber, countryCode:countryCode.replace("+", "") });
+      user = await this.userService.create({ phoneNumber, countryCode:countryCode });
     this.login(user, response);
   }
 
