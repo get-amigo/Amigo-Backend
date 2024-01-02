@@ -38,12 +38,6 @@ export class TransactionService {
     return this.transactionModel
       .find({ 'splitAmong.user': userId }) // Filter transactions where the user is in splitAmong
       .populate('group', 'name') // Assuming you want the group's name
-      .populate('paidBy', 'name')
-      .populate('creator', 'name')
-      .populate({
-        path: 'splitAmong.user',
-        select: 'name',
-      })
       .sort({ date: -1 })
       .exec()
       .then(transactions => {
