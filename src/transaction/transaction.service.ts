@@ -10,7 +10,7 @@ import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
 export class TransactionService {
   constructor(
     @InjectModel(TransactionSchema.name)
-    private transactionModel: Model<{ creator; group }>,
+    private transactionModel: Model<{ creator; group;splitAmong;description;date }>,
     private balanceService: BalanceService, // Inject BalanceService or similar functionality
     private activityFeedService: ActivityFeedService,
   ) {}
@@ -33,6 +33,33 @@ export class TransactionService {
 
     return newTransaction;
   }
+
+  getExpenses(userId) {
+    return this.transactionModel
+      .find({ 'splitAmong.user': userId }) // Filter transactions where the user is in splitAmong
+      .populate('group', 'name') // Assuming you want the group's name
+      .populate('paidBy', 'name')
+      .populate('creator', 'name')
+      .populate({
+        path: 'splitAmong.user',
+        select: 'name',
+      })
+      .sort({ date: -1 })
+      .exec()
+      .then(transactions => {
+        // Transform the data to the specified shape
+        return transactions.map(transaction => {
+          const userShare = transaction.splitAmong.find(sa => sa.user.toString() === userId.toString())?.amount;
+          return {
+            amount: userShare, // User's share
+            group: transaction.group.name,
+            description: transaction.description,
+            date: transaction.date
+          };
+        });
+      });
+  }
+  
 
   async deleteTransaction(transactionId: string) {
     // Find the transaction by its ID

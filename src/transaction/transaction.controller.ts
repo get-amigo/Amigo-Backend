@@ -24,6 +24,12 @@ export class TransactionController {
     return this.transactionService.createTransaction(createTransactionDto);
   }
 
+  @Get("expenses")
+  getExpenses(@Req() req: Request) {
+    const { id } = req['user'];
+    return this.transactionService.getExpenses(id);
+  }
+
   @Delete(':id')
   deleteTransaction(@Req() req: Request, @Param('id') transactionId) {
     return this.transactionService.deleteTransaction(transactionId);
