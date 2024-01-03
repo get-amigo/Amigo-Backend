@@ -123,7 +123,7 @@ export class BalanceService {
     const combinedBalances = savedBalances.concat(concatenatedTransactions);
     const updatedBalances = this.minimizeTransactions(combinedBalances);
     updatedBalances.forEach((obj) => (obj.group = groupId));
-    await this.balanceModel.deleteMany({ groupId });
+    await this.balanceModel.deleteMany({ group:groupId });
     return await this.balanceModel.insertMany(updatedBalances);
   }
 
