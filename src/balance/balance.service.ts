@@ -119,7 +119,7 @@ export class BalanceService {
   }
 
   async fetchAndMinimizeTransaction(groupId, concatenatedTransactions = []) {
-    const savedBalances = await this.balanceModel.find({ groupId });
+    const savedBalances = await this.balanceModel.find({ group:groupId });
     const combinedBalances = savedBalances.concat(concatenatedTransactions);
     const updatedBalances = this.minimizeTransactions(combinedBalances);
     updatedBalances.forEach((obj) => (obj.group = groupId));
