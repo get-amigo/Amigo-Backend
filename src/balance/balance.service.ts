@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import BalanceSchema from './balance.schema';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class BalanceService {
@@ -19,7 +20,39 @@ export class BalanceService {
     return newBalance.save();
   }
 
+
+async findi(userId) {
+  try {
+    // Convert userId to ObjectId
+    const objectIdUserId = new mongoose.Types.ObjectId(userId);
+
+    const balances = await this.balanceModel.aggregate([
+      {
+        $match: {
+          $or: [{ lender: objectIdUserId }, { borrower: objectIdUserId }]
+        }
+      },
+      {
+        $group: {
+          _id: "$group",
+          totalAmount: { $sum: "$amount" },
+          documents: { $push: "$$ROOT" }
+        }
+      }
+    ]).exec();
+
+    console.log("Aggregation results:", balances);
+    return balances;
+  } catch (error) {
+    console.error("Error in findi method:", error);
+    throw error;
+  }
+}
+
+  
+
   async findAll(userId) {
+    this.findi(userId)
     try {
       const balances = await this.balanceModel
         .find({
