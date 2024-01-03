@@ -21,38 +21,11 @@ export class BalanceService {
   }
 
 
-async findi(userId) {
-  try {
-    // Convert userId to ObjectId
-    const objectIdUserId = new mongoose.Types.ObjectId(userId);
 
-    const balances = await this.balanceModel.aggregate([
-      {
-        $match: {
-          $or: [{ lender: objectIdUserId }, { borrower: objectIdUserId }]
-        }
-      },
-      {
-        $group: {
-          _id: "$group",
-          totalAmount: { $sum: "$amount" },
-          documents: { $push: "$$ROOT" }
-        }
-      }
-    ]).exec();
-
-    console.log("Aggregation results:", balances);
-    return balances;
-  } catch (error) {
-    console.error("Error in findi method:", error);
-    throw error;
-  }
-}
 
   
 
   async findAll(userId) {
-    this.findi(userId)
     try {
       const balances = await this.balanceModel
         .find({
@@ -65,7 +38,7 @@ async findi(userId) {
         .populate('lender', 'name') // Optional: Populate lender name
         .populate('borrower', 'name') // Optional: Populate borrower name
         .exec();
-
+        
       return balances;
     } catch (error) {
       console.error(error);
