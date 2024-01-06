@@ -22,15 +22,22 @@ export class GroupService {
   ) {}
   async create(createGroupDto) {
     const { members, name, phoneNumbers } = createGroupDto;
-    const newMemberIds = await this.userService.createUsersAndGetIds(
-      phoneNumbers,
-    );
+    const newMemberIds = await this.userService.createUsersAndGetIds(phoneNumbers);
+  
+    // Combine and remove duplicates using a Set
+    const uniqueMembers = new Set([...members, ...newMemberIds]);
+  
+    // Convert the Set back to an array
+    const uniqueMembersArray = Array.from(uniqueMembers);
+  
     const createdGroup = new this.groupModel({
-      members: members.concat(newMemberIds),
+      members: uniqueMembersArray,
       name,
     });
+  
     return createdGroup.save();
   }
+  
 
   createChat(message, group, creator) {
     const chat = this.chatService.create(message);
