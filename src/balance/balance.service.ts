@@ -35,16 +35,18 @@ export class BalanceService {
           path: 'group',
           select: 'name', // Populating only the name of the group
         })
-        .populate('lender', 'name') // Optional: Populate lender name
-        .populate('borrower', 'name') // Optional: Populate borrower name
+        // Updated to include phoneNumber and countryCode
+        .populate('lender', 'name phoneNumber countryCode') 
+        .populate('borrower', 'name phoneNumber countryCode')
         .exec();
-        
+      
       return balances;
     } catch (error) {
       console.error(error);
       throw error; // Rethrow the error for further handling
     }
   }
+  
 
   async findOne(id: string) {
     const balance = await this.balanceModel.findById(id).exec();
