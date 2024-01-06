@@ -35,11 +35,11 @@ export class ActivityFeedService {
           path: 'relatedId',
           model: activity.onModel,
           populate: [
-            { path: 'paidBy', select: 'name' },
-            { path: 'creator', select: 'name' },
+            { path: 'paidBy', select: 'name phoneNumber countryCode' },
+            { path: 'creator', select: 'name phoneNumber countryCode' },
             {
               path: 'splitAmong.user',
-              select: 'name',
+              select: 'name phoneNumber countryCode',
             },
           ],
         });
@@ -48,8 +48,8 @@ export class ActivityFeedService {
           path: 'relatedId',
           model: activity.onModel,
           populate: [
-            { path: 'payer', select: 'name' },
-            { path: 'receiver', select: 'name' },
+            { path: 'payer', select: 'name phoneNumber countryCode' },
+            { path: 'receiver', select: 'name phoneNumber countryCode' },
           ],
         });
       }
