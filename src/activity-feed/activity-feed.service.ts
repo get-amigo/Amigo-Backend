@@ -14,7 +14,7 @@ export class ActivityFeedService {
   ) {}
   createActivity(createActivityDto) {
     const newActivity = new this.activityModel(createActivityDto);
-    this.server.emit(createActivityDto);
+    this.server.emit("activity created",createActivityDto);
     newActivity.save();
   }
 
