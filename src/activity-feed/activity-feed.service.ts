@@ -4,6 +4,7 @@ import ActivityFeedSchema from './activity-feed.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ActivityFeedDto } from './activity-feed-dto';
+@WebSocketGateway()
 @Injectable()
 export class ActivityFeedService {
   @WebSocketServer() server;
@@ -13,6 +14,7 @@ export class ActivityFeedService {
   ) {}
   createActivity(createActivityDto) {
     const newActivity = new this.activityModel(createActivityDto);
+    this.server.emit(createActivityDto);
     newActivity.save();
   }
 
