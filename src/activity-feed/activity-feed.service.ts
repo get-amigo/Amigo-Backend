@@ -18,53 +18,73 @@ export class ActivityFeedService {
     newActivity.save();
   }
 
+  async populateActivity(activity) {
+    if (!activity.onModel) return;
+  
+    const populationOptions = {
+      'Transaction': {
+        path: 'relatedId',
+        model: 'Transaction',
+        populate: [
+          { path: 'paidBy', select: 'name phoneNumber countryCode' },
+          { path: 'creator', select: 'name phoneNumber countryCode' },
+          { path: 'splitAmong.user', select: 'name phoneNumber countryCode' },
+        ],
+      },
+      'Payment': {
+        path: 'relatedId',
+        model: 'Payment',
+        populate: [
+          { path: 'payer', select: 'name phoneNumber countryCode' },
+          { path: 'receiver', select: 'name phoneNumber countryCode' },
+        ],
+      },
+      'Chat': {
+        path: 'relatedId',
+        model: 'Chat',
+      }
+    };
+  
+    const options = populationOptions[activity.onModel];
+    if (options) {
+      await this.activityModel.populate(activity, options);
+    }
+  }
+  
+
+  async findById(activityId) {
+    let activity = await this.activityModel
+      .findById(activityId)
+      .populate('creator', 'name')
+      .exec();
+  
+    await this.populateActivity(activity);
+  
+    return activity;
+  }
+  
+
+
   async findByGroup(groupId, lastActivityTime, size) {
     let query = { group: groupId };
     if (lastActivityTime) {
       query['createdAt'] = { $lt: new Date(lastActivityTime) };
     }
-
+  
     let activities = await this.activityModel
       .find(query)
       .limit(size)
       .populate('creator', 'name')
-      .sort({ createdAt: -1 }) // Sorting by creation time in descending order
+      .sort({ createdAt: -1 })
       .exec();
-
+  
     for (let activity of activities) {
-      if (activity.onModel && activity.onModel === 'Transaction') {
-        await this.activityModel.populate(activity, {
-          path: 'relatedId',
-          model: activity.onModel,
-          populate: [
-            { path: 'paidBy', select: 'name phoneNumber countryCode' },
-            { path: 'creator', select: 'name phoneNumber countryCode' },
-            {
-              path: 'splitAmong.user',
-              select: 'name phoneNumber countryCode',
-            },
-          ],
-        });
-      } else if (activity.onModel && activity.onModel === 'Payment') {
-        await this.activityModel.populate(activity, {
-          path: 'relatedId',
-          model: activity.onModel,
-          populate: [
-            { path: 'payer', select: 'name phoneNumber countryCode' },
-            { path: 'receiver', select: 'name phoneNumber countryCode' },
-          ],
-        });
-      }
-      else if (activity.onModel && activity.onModel === 'Chat') {
-        await this.activityModel.populate(activity, {
-          path: 'relatedId',
-          model: activity.onModel
-        });
-      }
+      await this.populateActivity(activity);
     }
-
+  
     return activities;
   }
+  
 
   findAll() {
     return `This action returns all activityFeed`;
