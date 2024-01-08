@@ -30,8 +30,6 @@ export class GroupController {
     return this.groupService.getAllUserGroups(id);
   }
 
-
-
   @Post(':id/join')
   joinGroup(@Req() req: Request, @Param('id') groupId) {
     const { id } = req['user'];

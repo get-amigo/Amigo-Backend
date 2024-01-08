@@ -22,23 +22,25 @@ export class GroupService {
   ) {}
   async create(createGroupDto) {
     const { members, name, phoneNumbers } = createGroupDto;
-    const newMemberIds = await this.userService.createUsersAndGetIds(phoneNumbers);
-    
-  
-    const allMemberIds = members.map(id => id.toString()).concat(newMemberIds.map(id => id.toString()));
+    const newMemberIds = await this.userService.createUsersAndGetIds(
+      phoneNumbers,
+    );
+
+    const allMemberIds = members
+      .map((id) => id.toString())
+      .concat(newMemberIds.map((id) => id.toString()));
     const uniqueMemberIdStrings = [...new Set(allMemberIds)];
-    const uniqueMemberIds = uniqueMemberIdStrings.map((idString:string) => new Types.ObjectId(idString));
-  
+    const uniqueMemberIds = uniqueMemberIdStrings.map(
+      (idString: string) => new Types.ObjectId(idString),
+    );
+
     const createdGroup = new this.groupModel({
       members: uniqueMemberIds,
       name,
     });
-  
+
     return createdGroup.save();
   }
-  
-  
-  
 
   createChat(message, group, creator) {
     const chat = this.chatService.create(message);
@@ -50,9 +52,6 @@ export class GroupService {
       onModel: 'Chat',
     });
   }
-
-
-  
 
   async joinGroup(groupId, userId) {
     const group = await this.groupModel.findById(groupId).exec();

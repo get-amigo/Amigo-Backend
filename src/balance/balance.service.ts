@@ -20,11 +20,6 @@ export class BalanceService {
     return newBalance.save();
   }
 
-
-
-
-  
-
   async findAll(userId) {
     try {
       const balances = await this.balanceModel
@@ -36,17 +31,16 @@ export class BalanceService {
           select: 'name', // Populating only the name of the group
         })
         // Updated to include phoneNumber and countryCode
-        .populate('lender', 'name phoneNumber countryCode') 
+        .populate('lender', 'name phoneNumber countryCode')
         .populate('borrower', 'name phoneNumber countryCode')
         .exec();
-      
+
       return balances;
     } catch (error) {
       console.error(error);
       throw error; // Rethrow the error for further handling
     }
   }
-  
 
   async findOne(id: string) {
     const balance = await this.balanceModel.findById(id).exec();
@@ -127,11 +121,11 @@ export class BalanceService {
   }
 
   async fetchAndMinimizeTransaction(groupId, concatenatedTransactions = []) {
-    const savedBalances = await this.balanceModel.find({ group:groupId });
+    const savedBalances = await this.balanceModel.find({ group: groupId });
     const combinedBalances = savedBalances.concat(concatenatedTransactions);
     const updatedBalances = this.minimizeTransactions(combinedBalances);
     updatedBalances.forEach((obj) => (obj.group = groupId));
-    await this.balanceModel.deleteMany({ group:groupId });
+    await this.balanceModel.deleteMany({ group: groupId });
     return await this.balanceModel.insertMany(updatedBalances);
   }
 

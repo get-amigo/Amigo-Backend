@@ -24,7 +24,7 @@ export class TransactionController {
     return this.transactionService.createTransaction(createTransactionDto);
   }
 
-  @Get("expenses")
+  @Get('expenses')
   getExpenses(@Req() req: Request) {
     const { id } = req['user'];
     return this.transactionService.getExpenses(id);

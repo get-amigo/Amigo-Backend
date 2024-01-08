@@ -14,15 +14,15 @@ export class ActivityFeedService {
   ) {}
   createActivity(createActivityDto) {
     const newActivity = new this.activityModel(createActivityDto);
-    this.server.emit("activity created",createActivityDto);
+    this.server.emit('activity created', createActivityDto._id);
     newActivity.save();
   }
 
   async populateActivity(activity) {
     if (!activity.onModel) return;
-  
+
     const populationOptions = {
-      'Transaction': {
+      Transaction: {
         path: 'relatedId',
         model: 'Transaction',
         populate: [
@@ -31,7 +31,7 @@ export class ActivityFeedService {
           { path: 'splitAmong.user', select: 'name phoneNumber countryCode' },
         ],
       },
-      'Payment': {
+      Payment: {
         path: 'relatedId',
         model: 'Payment',
         populate: [
@@ -39,59 +39,55 @@ export class ActivityFeedService {
           { path: 'receiver', select: 'name phoneNumber countryCode' },
         ],
       },
-      'Chat': {
+      Chat: {
         path: 'relatedId',
         model: 'Chat',
-      }
+      },
     };
-  
+
     const options = populationOptions[activity.onModel];
     if (options) {
       await this.activityModel.populate(activity, options);
     }
   }
-  
 
   async findById(activityId) {
     let activity = await this.activityModel
       .findById(activityId)
       .populate('creator', 'name')
       .exec();
-  
+
     await this.populateActivity(activity);
-  
+
     return activity;
   }
-  
-
 
   async findByGroup(groupId, lastActivityTime, size) {
     let query = { group: groupId };
     if (lastActivityTime) {
       query['createdAt'] = { $lt: new Date(lastActivityTime) };
     }
-  
+
     let activities = await this.activityModel
       .find(query)
       .limit(size)
       .populate('creator', 'name')
       .sort({ createdAt: -1 })
       .exec();
-  
+
     for (let activity of activities) {
       await this.populateActivity(activity);
     }
-  
+
     return activities;
   }
-  
 
   findAll() {
     return `This action returns all activityFeed`;
   }
 
-  async deleteByRelationId(relatedId){
-    await this.activityModel.deleteOne({relatedId});
+  async deleteByRelationId(relatedId) {
+    await this.activityModel.deleteOne({ relatedId });
   }
 
   findOne(id: number) {

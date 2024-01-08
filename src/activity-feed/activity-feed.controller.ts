@@ -18,13 +18,8 @@ export class ActivityFeedController {
   constructor(private readonly activityFeedService: ActivityFeedService) {}
 
   @Get()
-  findAll() {
-    return this.activityFeedService.findAll();
-  }
-
-  @Get(':groupId')
   findByGroup(
-    @Param('groupId') groupId: string,
+    @Query('groupId') groupId: string,
     @Query('lastActivityTime') lastActivityTime: string, // Receive last activity time
     @Query('size') size: number = 10, // Default page size is set to 10
   ) {
@@ -33,6 +28,11 @@ export class ActivityFeedController {
       lastActivityTime,
       size,
     );
+  }
+
+  @Get(':id')
+  findById(@Param('id') id: string) {
+    return this.activityFeedService.findById(id);
   }
 
   @Patch(':id')
