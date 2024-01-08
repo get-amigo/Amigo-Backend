@@ -14,14 +14,14 @@ export class ActivityFeedService {
   ) {}
   async createActivity(createActivityDto) {
     const newActivity = new this.activityModel(createActivityDto);
-    const createdActivity=await newActivity.save();
+    const createdActivity = await newActivity.save();
     await this.populateActivity(createdActivity);
     this.server.emit('activity created', createdActivity);
   }
 
   async populateActivity(activity) {
     if (!activity.onModel) return;
-    
+
     const populationOptions = {
       Transaction: {
         path: 'relatedId',
@@ -48,15 +48,15 @@ export class ActivityFeedService {
 
     const options = populationOptions[activity.onModel];
     if (options) {
-      await this.activityModel.populate(activity, options);
+      await this.activityModel.populate(activity, [
+        options,
+        { path: 'creator', select: 'name phoneNumber' },
+      ]);
     }
   }
 
   async findById(activityId) {
-    let activity = await this.activityModel
-      .findById(activityId)
-      .populate('creator', 'name')
-      .exec();
+    let activity = await this.activityModel.findById(activityId).exec();
 
     await this.populateActivity(activity);
 
@@ -72,7 +72,6 @@ export class ActivityFeedService {
     let activities = await this.activityModel
       .find(query)
       .limit(size)
-      .populate('creator', 'name')
       .sort({ createdAt: -1 })
       .exec();
 
