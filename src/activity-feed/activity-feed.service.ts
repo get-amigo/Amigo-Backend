@@ -12,15 +12,16 @@ export class ActivityFeedService {
     @InjectModel(ActivityFeedSchema.name)
     private activityModel: Model<ActivityFeedDto>,
   ) {}
-  createActivity(createActivityDto) {
+  async createActivity(createActivityDto) {
     const newActivity = new this.activityModel(createActivityDto);
-    this.server.emit('activity created', createActivityDto);
-    newActivity.save();
+    const createdActivity=await newActivity.save();
+    await this.populateActivity(createdActivity);
+    this.server.emit('activity created', createdActivity);
   }
 
   async populateActivity(activity) {
     if (!activity.onModel) return;
-
+    
     const populationOptions = {
       Transaction: {
         path: 'relatedId',
