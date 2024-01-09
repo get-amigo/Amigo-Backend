@@ -86,7 +86,7 @@ export class BalanceService {
 
     let creditors = [];
     let debtors = [];
-
+    
     // Separate into creditors and debtors
     for (let person in balances) {
       if (balances[person] > 0) {

@@ -22,7 +22,7 @@ export class PaymentService {
     const transaction = {
       lender: payer,
       borrower: receiver,
-      amount: amount,
+      amount: parseInt(amount),
     };
     const payment = await this.paymentModel.create(createPaymentDto);
     this.activityFeedService.createActivity({
