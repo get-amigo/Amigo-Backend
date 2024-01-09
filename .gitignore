@@ -37,4 +37,4 @@ lerna-debug.log*
 .env
 
 yarn.lock
-package.json.lock
+package.lock.json
