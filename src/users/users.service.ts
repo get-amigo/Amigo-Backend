@@ -15,6 +15,11 @@ export class UsersService {
     return createdUser.save();
   }
 
+  editUser(id,newUser)
+  {
+    return this.userModel.findByIdAndUpdate(id, newUser).exec();
+  }
+
   async findByEmail(email: string) {
     return await this.userModel.findOne({ email }).exec();
   }
