@@ -15,8 +15,7 @@ export class UsersService {
     return createdUser.save();
   }
 
-  editUser(id,newUser)
-  {
+  editUser(id, newUser) {
     return this.userModel.findByIdAndUpdate(id, newUser).exec();
   }
 

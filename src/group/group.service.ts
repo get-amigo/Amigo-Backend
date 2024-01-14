@@ -22,9 +22,8 @@ export class GroupService {
   ) {}
   async create(createGroupDto) {
     const { members, name, phoneNumbers } = createGroupDto;
-    const newMemberIds = await this.userService.createUsersAndGetIds(
-      phoneNumbers,
-    );
+    const newMemberIds =
+      await this.userService.createUsersAndGetIds(phoneNumbers);
 
     const allMemberIds = members
       .map((id) => id.toString())
@@ -51,6 +50,10 @@ export class GroupService {
       relatedId: chat._id,
       onModel: 'Chat',
     });
+  }
+
+  async editGroupName(groupId, groupName) {
+    return await this.groupModel.updateMany(groupId, { name: groupName });
   }
 
   async joinGroup(groupId, userId) {

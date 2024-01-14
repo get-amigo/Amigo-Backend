@@ -7,6 +7,7 @@ import {
   UseGuards,
   Req,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -28,6 +29,14 @@ export class GroupController {
   async getAllUserGroups(@Req() req: Request) {
     const { id } = req['user'];
     return this.groupService.getAllUserGroups(id);
+  }
+
+  @Patch()
+  async editGroupName(
+    @Param('id') groupId,
+    @Body('groupName') groupName: string,
+  ) {
+    return this.groupService.editGroupName(groupId, groupName);
   }
 
   @Post(':id/join')
