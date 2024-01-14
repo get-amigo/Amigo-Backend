@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -25,9 +26,23 @@ export class TransactionController {
   }
 
   @Get('expenses')
-  getExpenses(@Req() req: Request) {
+  getExpenses(
+    @Req() req: Request,
+    @Query('startDate') startDate: Date,
+    @Query('endDate') endDate: Date,
+    @Query('type') type: string,
+    @Query('page') page: number, // Page number
+    @Query('size') size: number, // Number of results per page
+  ) {
     const { id } = req['user'];
-    return this.transactionService.getExpenses(id);
+    return this.transactionService.getExpenses(
+      id,
+      startDate,
+      endDate,
+      type,
+      page,
+      size,
+    );
   }
 
   @Delete(':id')

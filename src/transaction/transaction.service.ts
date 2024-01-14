@@ -40,11 +40,26 @@ export class TransactionService {
     return newTransaction;
   }
 
-  getExpenses(userId) {
+  getExpenses(userId, startDate, endDate, type, page, size) {
+    const query = { 'splitAmong.user': userId };
+
+    if (startDate && endDate) {
+      query['date'] = { $gte: startDate, $lte: endDate };
+    }
+
+    if (type) {
+      query['type'] = type; // Add 'type' filter if provided
+    }
+
+    const skip = (page - 1) * size; // Calculate how many documents to skip
+    const limit = size;
+
     return this.transactionModel
-      .find({ 'splitAmong.user': userId }) // Filter transactions where the user is in splitAmong
+      .find(query) // Apply filter criteria
       .populate('group', 'name') // Assuming you want the group's name
       .sort({ date: -1 })
+      .skip(skip) // Skip the specified number of documents
+      .limit(limit) // Limit the number of results per page
       .exec()
       .then((transactions) => {
         // Transform the data to the specified shape
