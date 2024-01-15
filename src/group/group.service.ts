@@ -52,6 +52,37 @@ export class GroupService {
     });
   }
 
+
+  async addMembers(groupId, phoneNumbers) {
+    // Find the group
+    const group = await this.groupModel.findById(groupId).exec();
+  
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+  
+    // Create users based on phone numbers and get their IDs
+    const newMemberIds = await this.userService.createUsersAndGetIds(phoneNumbers);
+  
+    // Check if any of the new users are already members of the group
+    const existingMembers = group.members.filter(member => newMemberIds.includes(member.toString()));
+    if (existingMembers.length > 0) {
+      throw new BadRequestException('One or more users are already members of the group');
+    }
+  
+    // Add the new users to the group's members array
+    const newMemberObjectIds = newMemberIds.map(id => new Types.ObjectId(id));
+    group.members.push(...newMemberObjectIds.map(objectId => objectId.toString()));
+  
+    // Save the updated group
+    await group.save();
+  
+    return group; // Or some other meaningful response
+  }
+  
+
+  
+
   async editGroupName(groupId, groupName) {
     return await this.groupModel.updateMany(groupId, { name: groupName });
   }

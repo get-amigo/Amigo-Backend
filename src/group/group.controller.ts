@@ -25,6 +25,11 @@ export class GroupController {
     return this.groupService.create(createGroupBody);
   }
 
+  @Patch()
+  addMembers(@Param('id') groupId, @Body() phoneNumbers) {
+    return this.groupService.addMembers(groupId,phoneNumbers);
+  }
+
   @Get()
   async getAllUserGroups(@Req() req: Request) {
     const { id } = req['user'];
