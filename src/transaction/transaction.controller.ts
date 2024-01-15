@@ -30,7 +30,7 @@ export class TransactionController {
     @Req() req: Request,
     @Query('startDate') startDate: Date,
     @Query('endDate') endDate: Date,
-    @Query('type') type: string,
+    @Query('type') type: string | string[], // Modify the type parameter to accept a string or an array of strings
     @Query('page') page: number, // Page number
     @Query('size') size: number, // Number of results per page
   ) {

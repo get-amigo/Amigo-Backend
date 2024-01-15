@@ -40,7 +40,7 @@ export class TransactionService {
     return newTransaction;
   }
 
-  getExpenses(userId, startDate, endDate, type, page, size) {
+  async getExpenses(userId, startDate, endDate, type, page, size) {
     const query = { 'splitAmong.user': userId };
 
     if (startDate && endDate) {
@@ -48,33 +48,45 @@ export class TransactionService {
     }
 
     if (type) {
-      query['type'] = type; // Add 'type' filter if provided
+      if (Array.isArray(type)) {
+        // If 'type' is an array, filter transactions matching any type in the array
+        query['type'] = { $in: type };
+      } else {
+        // If 'type' is a single value, filter transactions with that type
+        query['type'] = type;
+      }
     }
 
     const skip = (page - 1) * size; // Calculate how many documents to skip
     const limit = size;
 
-    return this.transactionModel
-      .find(query) // Apply filter criteria
-      .populate('group', 'name') // Assuming you want the group's name
-      .sort({ date: -1 })
-      .skip(skip) // Skip the specified number of documents
-      .limit(limit) // Limit the number of results per page
-      .exec()
-      .then((transactions) => {
-        // Transform the data to the specified shape
-        return transactions.map((transaction) => {
-          const userShare = transaction.splitAmong.find(
-            (sa) => sa.user.toString() === userId.toString(),
-          )?.amount;
-          return {
-            amount: userShare, // User's share
-            group: transaction.group.name,
-            description: transaction.description,
-            date: transaction.date,
-          };
-        });
+    try {
+      const transactions = await this.transactionModel
+        .find(query) // Apply filter criteria
+        .populate('group', 'name') // Assuming you want the group's name
+        .sort({ date: -1 })
+        .skip(skip) // Skip the specified number of documents
+        .limit(limit) // Limit the number of results per page
+        .exec();
+
+      // Transform the data to the specified shape
+      const transformedTransactions = transactions.map((transaction) => {
+        const userShare = transaction.splitAmong.find(
+          (sa) => sa.user.toString() === userId.toString(),
+        )?.amount;
+        return {
+          amount: userShare, // User's share
+          group: transaction.group.name,
+          description: transaction.description,
+          date: transaction.date,
+        };
       });
+
+      return transformedTransactions;
+    } catch (error) {
+      // Handle any errors that occur during the database query
+      throw new Error(`Error fetching expenses: ${error.message}`);
+    }
   }
 
   async deleteTransaction(transactionId: string) {
