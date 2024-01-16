@@ -25,7 +25,7 @@ export class GroupController {
     return this.groupService.create(createGroupBody);
   }
 
-  @Patch()
+  @Patch(":id")
   addMembers(@Param('id') groupId, @Body() phoneNumbers) {
     return this.groupService.addMembers(groupId,phoneNumbers);
   }
