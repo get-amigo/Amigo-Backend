@@ -10,7 +10,6 @@ import {
   Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { response } from 'express';
 
 @Controller('auth')
 export class AuthController {

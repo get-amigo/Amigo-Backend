@@ -52,38 +52,41 @@ export class GroupService {
     });
   }
 
-
   async addMembers(groupId, phoneNumbers) {
     // Find the group
     const group = await this.groupModel.findById(groupId).exec();
-  
+
     if (!group) {
       throw new NotFoundException('Group not found');
     }
-  
+
     // Create users based on phone numbers and get their IDs
-    const newMemberIds = await this.userService.createUsersAndGetIds(phoneNumbers);
-  
+    const newMemberIds =
+      await this.userService.createUsersAndGetIds(phoneNumbers);
+
     // Filter out existing members from the new users
-    const nonExistingMembers = newMemberIds.filter(id => !group.members.includes(id.toString()));
-  
+    const nonExistingMembers = newMemberIds.filter(
+      (id) => !group.members.includes(id.toString()),
+    );
+
     // If all users are existing members, you can simply return the group without making any changes
     if (nonExistingMembers.length === 0) {
       return group;
     }
-  
+
     // Add the new users to the group's members array
-    const newMemberObjectIds = nonExistingMembers.map(id => new Types.ObjectId(id));
-    group.members.push(...newMemberObjectIds.map(objectId => objectId.toString()));
-  
+    const newMemberObjectIds = nonExistingMembers.map(
+      (id) => new Types.ObjectId(id),
+    );
+    group.members.push(
+      ...newMemberObjectIds.map((objectId) => objectId.toString()),
+    );
+
     // Save the updated group
     await group.save();
-  
+
     return group; // Or some other meaningful response
   }
-  
-
-  
 
   async editGroupName(groupId, groupName) {
     return await this.groupModel.updateMany(groupId, { name: groupName });

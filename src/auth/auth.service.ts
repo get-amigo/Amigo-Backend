@@ -54,31 +54,46 @@ export class AuthService {
 
   async verifyOTP(otpBody, response) {
     const { phoneNumber, countryCode, otp } = otpBody;
-    if (process.env.ENV == 'production') {
-      const client = Twilio(
-        process.env.TWILIO_ACCOUNT_SID,
-        process.env.TWILIO_AUTH_TOKEN,
-      );
-      const verificationToken = process.env.TWILIO_VERIFICATION_SID;
-      const verificationCheck = await client.verify.v2
-        .services(verificationToken)
-        .verificationChecks.create({
-          to: '+' + countryCode + phoneNumber,
-          code: otp,
-        });
-      const { status } = verificationCheck;
-      if (status != 'approved') return response.json({ status });
+
+    if (process.env.ENV === 'production') {
+      await this.verifyTwilioOTP(phoneNumber, countryCode, otp, response);
     }
+
     let user = await this.userService.findUserPhoneNumber(
       phoneNumber,
       countryCode,
     );
-    if (!user)
+
+    if (!user) {
       user = await this.userService.create({
         phoneNumber,
-        countryCode: countryCode,
+        countryCode,
       });
+    }
+
     this.login(user, response);
+  }
+
+  async verifyTwilioOTP(phoneNumber, countryCode, otp, response) {
+    const client = Twilio(
+      process.env.TWILIO_ACCOUNT_SID,
+      process.env.TWILIO_AUTH_TOKEN,
+    );
+
+    const verificationToken = process.env.TWILIO_VERIFICATION_SID;
+
+    const verificationCheck = await client.verify.v2
+      .services(verificationToken)
+      .verificationChecks.create({
+        to: `+${countryCode}${phoneNumber}`,
+        code: otp,
+      });
+
+    const { status } = verificationCheck;
+
+    if (status !== 'approved') {
+      return response.json({ status });
+    }
   }
 
   async verifyUser(login) {
