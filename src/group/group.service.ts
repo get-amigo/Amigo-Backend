@@ -64,14 +64,16 @@ export class GroupService {
     // Create users based on phone numbers and get their IDs
     const newMemberIds = await this.userService.createUsersAndGetIds(phoneNumbers);
   
-    // Check if any of the new users are already members of the group
-    const existingMembers = group.members.filter(member => newMemberIds.includes(member.toString()));
-    if (existingMembers.length > 0) {
-      throw new BadRequestException('One or more users are already members of the group');
+    // Filter out existing members from the new users
+    const nonExistingMembers = newMemberIds.filter(id => !group.members.includes(id.toString()));
+  
+    // If all users are existing members, you can simply return the group without making any changes
+    if (nonExistingMembers.length === 0) {
+      return group;
     }
   
     // Add the new users to the group's members array
-    const newMemberObjectIds = newMemberIds.map(id => new Types.ObjectId(id));
+    const newMemberObjectIds = nonExistingMembers.map(id => new Types.ObjectId(id));
     group.members.push(...newMemberObjectIds.map(objectId => objectId.toString()));
   
     // Save the updated group
