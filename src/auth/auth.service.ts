@@ -26,8 +26,6 @@ export class AuthService {
     });
   }
 
-  
-
   getAuthToken(userData) {
     const payload = { id: userData.id };
     const accessToken = this.jwtService.sign(payload);
@@ -54,30 +52,44 @@ export class AuthService {
     return status;
   }
 
+  async sendOTPAndEditPhoneNumber(otpBody) {
+    const { phoneNumber, countryCode } = otpBody;
+
+    const user = this.userService.findUserPhoneNumber(phoneNumber, countryCode);
+    if (user) return { status: false };
+
+    return this.sendOTP(countryCode + phoneNumber);
+  }
+
   async verifyOTP(otpBody, response) {
     const { phoneNumber, countryCode, otp } = otpBody;
     // Verify OTP using Twilio in production environment
     if (process.env.ENV === 'production') {
       await this.verifyTwilioOTP(phoneNumber, countryCode, otp, response);
     }
-  
+
     // Find or create user based on phone number and country code
-    let user = await this.userService.findOrCreateUser(phoneNumber, countryCode);
-  
+    let user = await this.userService.findOrCreateUser(
+      phoneNumber,
+      countryCode,
+    );
+
     // Perform login with the user
     this.login(user, response);
   }
 
-  async verifyOTPAndEditPhoneNumber(userId,otpBody,response)
-  {
+  async verifyOTPAndEditPhoneNumber(userId, otpBody, response) {
     const { phoneNumber, countryCode, otp } = otpBody;
-  
+
     if (process.env.ENV === 'production') {
       await this.verifyTwilioOTP(phoneNumber, countryCode, otp, response);
     }
 
-    const newUser=await this.userService.editUser(userId,{phoneNumber,countryCode});
-     response.json(newUser);
+    const newUser = await this.userService.editUser(userId, {
+      phoneNumber,
+      countryCode,
+    });
+    response.json(newUser);
   }
 
   async verifyTwilioOTP(phoneNumber, countryCode, otp, response) {

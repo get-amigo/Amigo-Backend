@@ -26,7 +26,7 @@ export class UsersService {
   async findOrCreateUser(phoneNumber, countryCode) {
     // Find user by phone number and country code
     let user = await this.findUserPhoneNumber(phoneNumber, countryCode);
-  
+
     // If user doesn't exist, create a new user
     if (!user) {
       user = await this.create({
@@ -34,10 +34,9 @@ export class UsersService {
         countryCode,
       });
     }
-  
+
     return user;
   }
-
 
   async createUsersAndGetIds(phoneNumbers) {
     let userIds = [];
