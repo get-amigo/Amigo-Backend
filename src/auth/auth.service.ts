@@ -69,6 +69,17 @@ export class AuthService {
     this.login(user, response);
   }
 
+  async verifyOTPAndEditPhoneNumber(userId,otpBody,response)
+  {
+    const { phoneNumber, countryCode, otp } = otpBody;
+  
+    if (process.env.ENV === 'production') {
+      await this.verifyTwilioOTP(phoneNumber, countryCode, otp, response);
+    }
+
+    return this.userService.editUser(userId,{phoneNumber,countryCode});
+  }
+
   async verifyTwilioOTP(phoneNumber, countryCode, otp, response) {
     const client = Twilio(
       process.env.TWILIO_ACCOUNT_SID,
