@@ -29,10 +29,10 @@ export class AuthController {
   }
 
   @UseGuards(new JwtAuthGuard('jwt'))
-  @Patch('/editPhoneNumber')
+  @Post('/editPhoneNumber')
   async verifyOTPAndEditPhoneNumber(@Body() otpBody,@Req() req: Request,@Res() response) {
     const { id } = req['user'];
-    return this.authService.verifyOTPAndEditPhoneNumber(id,otpBody,response);
+    this.authService.verifyOTPAndEditPhoneNumber(id,otpBody,response);
   }
 
 }

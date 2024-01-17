@@ -56,7 +56,6 @@ export class AuthService {
 
   async verifyOTP(otpBody, response) {
     const { phoneNumber, countryCode, otp } = otpBody;
-  
     // Verify OTP using Twilio in production environment
     if (process.env.ENV === 'production') {
       await this.verifyTwilioOTP(phoneNumber, countryCode, otp, response);
@@ -77,7 +76,8 @@ export class AuthService {
       await this.verifyTwilioOTP(phoneNumber, countryCode, otp, response);
     }
 
-    return this.userService.editUser(userId,{phoneNumber,countryCode});
+    const newUser=await this.userService.editUser(userId,{phoneNumber,countryCode});
+     response.json(newUser);
   }
 
   async verifyTwilioOTP(phoneNumber, countryCode, otp, response) {
