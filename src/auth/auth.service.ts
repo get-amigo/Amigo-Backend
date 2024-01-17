@@ -26,6 +26,8 @@ export class AuthService {
     });
   }
 
+  
+
   getAuthToken(userData) {
     const payload = { id: userData.id };
     const accessToken = this.jwtService.sign(payload);
@@ -54,23 +56,16 @@ export class AuthService {
 
   async verifyOTP(otpBody, response) {
     const { phoneNumber, countryCode, otp } = otpBody;
-
+  
+    // Verify OTP using Twilio in production environment
     if (process.env.ENV === 'production') {
       await this.verifyTwilioOTP(phoneNumber, countryCode, otp, response);
     }
-
-    let user = await this.userService.findUserPhoneNumber(
-      phoneNumber,
-      countryCode,
-    );
-
-    if (!user) {
-      user = await this.userService.create({
-        phoneNumber,
-        countryCode,
-      });
-    }
-
+  
+    // Find or create user based on phone number and country code
+    let user = await this.userService.findOrCreateUser(phoneNumber, countryCode);
+  
+    // Perform login with the user
     this.login(user, response);
   }
 
