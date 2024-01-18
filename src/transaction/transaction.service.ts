@@ -76,7 +76,7 @@ export class TransactionService {
         )?.amount;
         return {
           amount: userShare, // User's share
-          group: transaction.group.name,
+          group: transaction.group,
           description: transaction.description,
           date: transaction.date,
         };
