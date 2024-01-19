@@ -14,7 +14,7 @@ import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
 export class GroupService {
   constructor(
     @InjectModel(GroupSchema.name)
-    private groupModel: Model<{ name: string; members: [string] }>,
+    private groupModel: Model<{ name: string; members: string[] }>,
     private transactionService: TransactionService,
     private userService: UsersService,
     private chatService: ChatService,
@@ -51,6 +51,30 @@ export class GroupService {
       onModel: 'Chat',
     });
   }
+
+  async leaveGroup(userId, groupId) {
+    // Find the group
+    const group = await this.groupModel.findById(groupId).exec();
+  
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+  
+    // Check if the user is a member of the group
+    const isMember = group.members.includes(userId.toString());
+  
+    if (!isMember) {
+      throw new NotFoundException('User is not a member of the group');
+    }
+  
+    group.members = group.members.filter((id) => id !== userId.toString());
+  
+    // Save the updated group
+    await group.save();
+  
+    return group; // Or some other meaningful response
+  }
+  
 
   async addMembers(groupId, phoneNumbers) {
     // Find the group

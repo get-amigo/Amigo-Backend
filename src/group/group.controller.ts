@@ -8,6 +8,7 @@ import {
   Req,
   Query,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -23,6 +24,12 @@ export class GroupController {
     const { id } = req['user'];
     createGroupBody['members'] = [new Types.ObjectId(id)];
     return this.groupService.create(createGroupBody);
+  }
+
+  @Delete(':id')
+  leaveGroup(@Req() req: Request,@Param('id') groupId) {
+    const { id } = req['user'];
+    return this.groupService.leaveGroup(id,groupId);
   }
 
   @Patch(':id')
