@@ -188,8 +188,7 @@ export class GroupService {
             _id: 1,
             name: 1,
             members: 1,
-            balance: 1,
-            membersInfo: { $map: { input: '$members', as: 'member', in: { name: '$$member.name', phoneNumber: '$$member.phoneNumber', countryCode: '$$member.countryCode' } } },
+            balance: 1
           },
         },
       ]);
