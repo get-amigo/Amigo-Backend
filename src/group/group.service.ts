@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import GroupSchema from './group.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { TransactionService } from 'src/transaction/transaction.service';
 import { UsersService } from 'src/users/users.service';
 import { ChatService } from 'src/chat/chat.service';
@@ -116,20 +116,67 @@ export class GroupService {
 
   async getAllUserGroups(userId) {
     try {
-      // Find all groups where the userId is in the members array and populate the 'members' field
-      const userGroups = await this.groupModel
-        .find({ members: { $in: [userId] } })
-        .populate('members', 'name phoneNumber countryCode') // Populate the 'members' field and select the 'name' field
-        .exec();
-
-      // Return the list of groups with the names of their members
+      const userGroups = await this.groupModel.aggregate([
+        {
+          $match: {
+            members: new mongoose.Types.ObjectId(userId),
+          },
+        },
+        {
+          $lookup: {
+            from: 'balances', // replace 'balances' with your actual Balance model's collection name
+            let: { groupId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$group', '$$groupId'] },
+                      {
+                        $or: [{ lender: new mongoose.Types.ObjectId(userId) }, { borrower: new mongoose.Types.ObjectId(userId) }],
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: 'userBalances',
+          },
+        },
+        {
+          $addFields: {
+            balance: { $gt: [{ $size: '$userBalances' }, 0] },
+          },
+        },
+        {
+          $unset: 'userBalances',
+        },
+        {
+          $lookup: {
+            from: 'users', // replace 'users' with your actual User model's collection name
+            localField: 'members',
+            foreignField: '_id',
+            as: 'members',
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            members: 1,
+            balance: 1,
+            membersInfo: { $map: { input: '$members', as: 'member', in: { name: '$$member.name', phoneNumber: '$$member.phoneNumber', countryCode: '$$member.countryCode' } } },
+          },
+        },
+      ]);
+  
       return userGroups;
     } catch (error) {
-      // Handle any errors that occur during the database query
       console.error('Error getting user groups:', error);
       throw error;
     }
   }
+  
 
   async getAllTransactions(groupId) {
     return this.transactionService.getTransactionsByGroupId(groupId);
