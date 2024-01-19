@@ -67,8 +67,8 @@ export class GroupService {
       throw new NotFoundException('User is not a member of the group');
     }
   
-    group.members = group.members.filter((id) => id !== userId.toString());
-  
+    group.members = group.members.filter((id) => id != userId.toString());
+
     // Save the updated group
     await group.save();
   
