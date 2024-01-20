@@ -27,9 +27,9 @@ export class GroupController {
   }
 
   @Delete(':id')
-  leaveGroup(@Req() req: Request,@Param('id') groupId) {
+  leaveGroup(@Req() req: Request, @Param('id') groupId) {
     const { id } = req['user'];
-    return this.groupService.leaveGroup(id,groupId);
+    return this.groupService.leaveGroup(id, groupId);
   }
 
   @Patch(':id')
@@ -45,7 +45,7 @@ export class GroupController {
 
   @Patch()
   async editGroupName(
-    @Param('id') groupId,
+    @Query('id') groupId: string,
     @Body('groupName') groupName: string,
   ) {
     return this.groupService.editGroupName(groupId, groupName);

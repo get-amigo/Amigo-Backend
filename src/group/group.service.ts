@@ -55,26 +55,25 @@ export class GroupService {
   async leaveGroup(userId, groupId) {
     // Find the group
     const group = await this.groupModel.findById(groupId).exec();
-  
+
     if (!group) {
       throw new NotFoundException('Group not found');
     }
-  
+
     // Check if the user is a member of the group
     const isMember = group.members.includes(userId.toString());
-  
+
     if (!isMember) {
       throw new NotFoundException('User is not a member of the group');
     }
-  
+
     group.members = group.members.filter((id) => id != userId.toString());
 
     // Save the updated group
     await group.save();
-  
+
     return group; // Or some other meaningful response
   }
-  
 
   async addMembers(groupId, phoneNumbers) {
     // Find the group
@@ -113,7 +112,10 @@ export class GroupService {
   }
 
   async editGroupName(groupId, groupName) {
-    return await this.groupModel.updateMany(groupId, { name: groupName });
+    return await this.groupModel.updateOne(
+      { _id: groupId },
+      { $set: { name: groupName } },
+    );
   }
 
   async joinGroup(groupId, userId) {
@@ -157,7 +159,10 @@ export class GroupService {
                     $and: [
                       { $eq: ['$group', '$$groupId'] },
                       {
-                        $or: [{ lender: new mongoose.Types.ObjectId(userId) }, { borrower: new mongoose.Types.ObjectId(userId) }],
+                        $or: [
+                          { lender: new mongoose.Types.ObjectId(userId) },
+                          { borrower: new mongoose.Types.ObjectId(userId) },
+                        ],
                       },
                     ],
                   },
@@ -188,18 +193,17 @@ export class GroupService {
             _id: 1,
             name: 1,
             members: 1,
-            balance: 1
+            balance: 1,
           },
         },
       ]);
-  
+
       return userGroups;
     } catch (error) {
       console.error('Error getting user groups:', error);
       throw error;
     }
   }
-  
 
   async getAllTransactions(groupId) {
     return this.transactionService.getTransactionsByGroupId(groupId);
