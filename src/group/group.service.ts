@@ -174,7 +174,22 @@ export class GroupService {
         },
         {
           $addFields: {
-            balance: { $gt: [{ $size: '$userBalances' }, 0] },
+            // Summing up the amounts for lenders and subtracting for borrowers
+            balance: {
+              $sum: {
+                $map: {
+                  input: '$userBalances',
+                  as: 'balanceEntry',
+                  in: {
+                    $cond: {
+                      if: { $eq: ['$$balanceEntry.lender', new mongoose.Types.ObjectId(userId)] },
+                      then: '$$balanceEntry.amount',
+                      else: { $multiply: ['$$balanceEntry.amount', -1] },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
         {
@@ -197,13 +212,15 @@ export class GroupService {
           },
         },
       ]);
-
+  
       return userGroups;
     } catch (error) {
       console.error('Error getting user groups:', error);
       throw error;
     }
   }
+  
+  
 
   async getAllTransactions(groupId) {
     return this.transactionService.getTransactionsByGroupId(groupId);
