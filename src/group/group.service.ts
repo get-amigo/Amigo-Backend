@@ -145,7 +145,7 @@ export class GroupService {
       // Find all groups where the userId is in the members array and populate the 'members' field
       const userGroups = await this.groupModel
         .find({ members: { $in: [userId] } })
-        .populate('members', 'name') // Populate the 'members' field and select the 'name' field
+        .populate('members', 'name phoneNumber countryCode') // Populate the 'members' field and select the 'name' field
         .exec();
 
       // Return the list of groups with the names of their members
