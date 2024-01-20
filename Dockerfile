@@ -1,4 +1,4 @@
-FROM node:16.19
+FROM node:18.18
 
 # RUN apt-get --no-cache add g++ gcc libgcc libstdc++ linux-headers make python3
 
