@@ -156,8 +156,6 @@ export class GroupService {
       throw error;
     }
   }
-  
-  
 
   async getAllTransactions(groupId) {
     return this.transactionService.getTransactionsByGroupId(groupId);
