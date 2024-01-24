@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import BalanceSchema from './balance.schema';
 import mongoose from 'mongoose';
+import GroupBalanceSchema from './groupBalance.schema';
 
 @Injectable()
 export class BalanceService {
@@ -13,6 +14,13 @@ export class BalanceService {
       group: string;
       amountOwed: Map<number, number>;
     }>,
+    @InjectModel(GroupBalanceSchema.name)
+    private groupBalanceModel: Model<{
+      user: 'string';
+      group: string;
+      amount: Number;
+    }>,
+
   ) {}
 
   async create(createBalanceDto) {

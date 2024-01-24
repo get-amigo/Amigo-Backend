@@ -18,6 +18,7 @@ import ActivityFeedSchema from 'src/activity-feed/activity-feed.schema';
 import { ChatService } from 'src/chat/chat.service';
 import { ChatModule } from 'src/chat/chat.module';
 import ChatSchema from 'src/chat/chat.schema';
+import GroupBalanceSchema from 'src/balance/groupBalance.schema';
 @Module({
   imports: [
     TransactionModule,
@@ -31,6 +32,7 @@ import ChatSchema from 'src/chat/chat.schema';
       UsersSchema,
       ActivityFeedSchema,
       ChatSchema,
+      GroupBalanceSchema
     ]),
   ],
   controllers: [GroupController, UsersController],

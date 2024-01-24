@@ -6,8 +6,9 @@ import TransactionSchema from './transaction.schema';
 import { BalanceService } from 'src/balance/balance.service';
 import { BalanceModule } from 'src/balance/balance.module';
 import BalanceSchema from 'src/balance/balance.schema';
-import ActivityFeedSchema from 'src/activity-feed/activity-feed.schema';
+import GroupBalanceSchema from 'src/balance/groupBalance.schema';
 import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
+import ActivityFeedSchema from 'src/activity-feed/activity-feed.schema';
 @Module({
   imports: [
     BalanceModule,
@@ -15,6 +16,7 @@ import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
       TransactionSchema,
       BalanceSchema,
       ActivityFeedSchema,
+      GroupBalanceSchema
     ]),
   ],
   controllers: [TransactionController],
