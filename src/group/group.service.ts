@@ -142,101 +142,99 @@ export class GroupService {
 
   async getAllUserGroups(userId) {
     try {
-      const userGroups = await this.groupModel.aggregate([
-        {
-          $match: {
-            members: new Types.ObjectId(userId)
-          }
-        },
-        {
-          $lookup: {
-            from: "activity",
-            localField: "_id",
-            foreignField: "groupId",
-            as: "activities"
-          }
-        },
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'members',
-            foreignField: '_id',
-            as: 'members',
-          },
-        },
-        {
-          $project: {
-            _id: 1,
-            groupIds: ['$_id'], // Wrap _id in an array
-            name: 1,
-            members: {
-              $map: {
-                input: '$members',
-                as: 'member',
-                in: {
-                  name: '$$member.name',
-                  phoneNumber: '$$member.phoneNumber',
-                  countryCode: '$$member.countryCode',
-                },
-              },
-            },
-            activities: 1,
-          },
-        },
-        {
-          $lookup: {
-            from: "activityfeeds",
-            let: { group_ids: "$groupIds" },
-            pipeline: [
-              {
+        const userGroups = await this.groupModel.aggregate([
+            {
                 $match: {
-                  $expr: {
-                    $in: ["$group", "$$group_ids"]
-                  }
+                    members: new Types.ObjectId(userId)
                 }
-              },
-              {
+            },
+            {
+                $lookup: {
+                    from: "activity",
+                    localField: "_id",
+                    foreignField: "groupId",
+                    as: "activities"
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'members',
+                    foreignField: '_id',
+                    as: 'members',
+                },
+            },
+            {
+                $project: {
+                    _id: 1,
+                    groupIds: ['$_id'], // Wrap _id in an array
+                    name: 1,
+                    members: {
+                        $map: {
+                            input: '$members',
+                            as: 'member',
+                            in: {
+                                name: '$$member.name',
+                                phoneNumber: '$$member.phoneNumber',
+                                countryCode: '$$member.countryCode',
+                            },
+                        },
+                    },
+                    activities: 1,
+                },
+            },
+            {
+                $lookup: {
+                    from: "activityfeeds",
+                    let: { group_ids: "$groupIds" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $in: ["$group", "$$group_ids"]
+                                }
+                            }
+                        },
+                        {
+                            $sort: {
+                                createdAt: -1,
+                            },
+                        },
+                        {
+                            $group: {
+                                _id: '$group',
+                                latestActivity: { $first: '$$ROOT' },
+                            },
+                        },
+                    ],
+                    as: "groupActivities",
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    groupIds: 1,
+                    name: 1,
+                    members: 1,
+                    activities: 1,
+                    latestActivity: { $arrayElemAt: ["$groupActivities.latestActivity", 0] }
+                },
+            },
+            {
                 $sort: {
-                  createdAt: -1,
-                },
-              },
-              {
-                $group: {
-                  _id: '$group',
-                  latestActivity: { $first: '$$ROOT' },
-                },
-              },
-            ],
-            as: "groupActivities",
-          }
-        },
-        {
-          $project: {
-            _id: 1,
-            groupIds: 1,
-            name: 1,
-            members: 1,
-            activities: 1,
-            latestActivity: { $arrayElemAt: ["$groupActivities.latestActivity", 0] }
-          },
-        },
-      ]).exec();
-      
-      
-
-      
-      userGroups.sort(function(a, b) {
-        const dateA = a?.latestActivity?.createdAt || 0;
-        const dateB = b?.latestActivity?.createdAt || 0;
-        return dateB-dateA;
-    });
-    
-      return userGroups;
+                    'latestActivity.createdAt': -1,
+                    'createdAt': -1
+                }
+            },
+        ]).exec();
+        
+        return userGroups;
     } catch (error) {
-      console.error('Error getting user groups:', error);
-      throw error;
+        console.error('Error getting user groups:', error);
+        throw error;
     }
-  }
+}
+
   
   
 
