@@ -158,7 +158,7 @@ export class GroupService {
         },
         {
           $lookup: {
-            from: 'users', // Replace 'users' with the actual name of your User model
+            from: 'users',
             localField: 'members',
             foreignField: '_id',
             as: 'members',
@@ -166,6 +166,8 @@ export class GroupService {
         },
         {
           $project: {
+            _id: 1,
+            groupIds: ['$_id'], // Wrap _id in an array
             name: 1,
             members: {
               $map: {
@@ -178,13 +180,52 @@ export class GroupService {
                 },
               },
             },
+            activities: 1,
           },
-        }
-        
+        },
+        {
+          $lookup: {
+            from: "activityfeeds",
+            let: { group_ids: "$groupIds" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $in: ["$group", "$$group_ids"]
+                  }
+                }
+              },
+              {
+                $sort: {
+                  createdAt: -1,
+                },
+              },
+              {
+                $group: {
+                  _id: '$group',
+                  latestActivity: { $first: '$$ROOT' },
+                },
+              },
+            ],
+            as: "groupActivities",
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            groupIds: 1,
+            name: 1,
+            members: 1,
+            activities: 1,
+            latestActivity: { $arrayElemAt: ["$groupActivities.latestActivity", 0] }
+          },
+        },
       ]).exec();
-
+      
       
 
+      
+      console.log(userGroups[0]);
       
   
       return userGroups;
