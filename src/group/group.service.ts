@@ -225,9 +225,12 @@ export class GroupService {
       
 
       
-      console.log(userGroups[0]);
-      
-  
+      userGroups.sort(function(a, b) {
+        const dateA = a?.latestActivity?.createdAt || 0;
+        const dateB = b?.latestActivity?.createdAt || 0;
+        return dateB-dateA;
+    });
+    
       return userGroups;
     } catch (error) {
       console.error('Error getting user groups:', error);
