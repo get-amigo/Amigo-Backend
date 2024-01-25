@@ -17,7 +17,7 @@ import GroupBalanceSchema from 'src/balance/groupBalance.schema';
       PaymentSchema,
       BalanceSchema,
       ActivityFeedSchema,
-      GroupBalanceSchema
+      GroupBalanceSchema,
     ]),
   ],
   controllers: [PaymentController],

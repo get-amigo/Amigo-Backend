@@ -6,7 +6,7 @@ import BalanceSchema from './balance.schema';
 import GroupBalanceSchema from './groupBalance.schema';
 
 @Module({
-  imports: [MongooseModule.forFeature([BalanceSchema,GroupBalanceSchema])],
+  imports: [MongooseModule.forFeature([BalanceSchema, GroupBalanceSchema])],
   controllers: [BalanceController],
   providers: [BalanceService],
 })

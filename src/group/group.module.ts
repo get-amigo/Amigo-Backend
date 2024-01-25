@@ -32,7 +32,7 @@ import GroupBalanceSchema from 'src/balance/groupBalance.schema';
       UsersSchema,
       ActivityFeedSchema,
       ChatSchema,
-      GroupBalanceSchema
+      GroupBalanceSchema,
     ]),
   ],
   controllers: [GroupController, UsersController],

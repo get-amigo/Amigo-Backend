@@ -20,7 +20,6 @@ export class BalanceService {
       group: string;
       amount: Number;
     }>,
-
   ) {}
 
   async create(createBalanceDto) {
@@ -38,9 +37,9 @@ export class BalanceService {
           path: 'group',
           select: 'name', // Populating only the name of the group
         })
-        // Updated to include phoneNumber and countryCode
         .populate('lender', 'name phoneNumber countryCode')
         .populate('borrower', 'name phoneNumber countryCode')
+        .sort({ createdAt: -1 }) // Assuming 'createdAt' is a timestamp field
         .exec();
 
       return balances;

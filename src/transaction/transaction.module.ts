@@ -16,7 +16,7 @@ import ActivityFeedSchema from 'src/activity-feed/activity-feed.schema';
       TransactionSchema,
       BalanceSchema,
       ActivityFeedSchema,
-      GroupBalanceSchema
+      GroupBalanceSchema,
     ]),
   ],
   controllers: [TransactionController],
