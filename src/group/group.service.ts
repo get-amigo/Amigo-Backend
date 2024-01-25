@@ -142,20 +142,59 @@ export class GroupService {
 
   async getAllUserGroups(userId) {
     try {
-      // Find all groups where the userId is in the members array and populate the 'members' field
-      const userGroups = await this.groupModel
-        .find({ members: { $in: [userId] } })
-        .populate('members', 'name phoneNumber countryCode') // Populate the 'members' field and select the 'name' field
-        .exec();
+      const userGroups = await this.groupModel.aggregate([
+        {
+          $match: {
+            members: new Types.ObjectId(userId)
+          }
+        },
+        {
+          $lookup: {
+            from: "activity",
+            localField: "_id",
+            foreignField: "groupId",
+            as: "activities"
+          }
+        },
+        {
+          $lookup: {
+            from: 'users', // Replace 'users' with the actual name of your User model
+            localField: 'members',
+            foreignField: '_id',
+            as: 'members',
+          },
+        },
+        {
+          $project: {
+            name: 1,
+            members: {
+              $map: {
+                input: '$members',
+                as: 'member',
+                in: {
+                  name: '$$member.name',
+                  phoneNumber: '$$member.phoneNumber',
+                  countryCode: '$$member.countryCode',
+                },
+              },
+            },
+          },
+        }
+        
+      ]).exec();
 
-      // Return the list of groups with the names of their members
+      
+
+      
+  
       return userGroups;
     } catch (error) {
-      // Handle any errors that occur during the database query
       console.error('Error getting user groups:', error);
       throw error;
     }
   }
+  
+  
 
   async getAllTransactions(groupId) {
     return this.transactionService.getTransactionsByGroupId(groupId);
