@@ -5,7 +5,7 @@ FROM node:18.18
 WORKDIR /usr/src/app
 
 # Copy the package.json and yarn.lock files to the working directory
-COPY package.json yarn.lock ./
+COPY package.json ./
 
 # Install app dependencies
 RUN yarn install
