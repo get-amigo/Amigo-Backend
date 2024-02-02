@@ -175,6 +175,7 @@ export class GroupService {
                   input: '$members',
                   as: 'member',
                   in: {
+                    _id: '$$member._id',
                     name: '$$member.name',
                     phoneNumber: '$$member.phoneNumber',
                     countryCode: '$$member.countryCode',
