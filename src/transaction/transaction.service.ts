@@ -75,6 +75,7 @@ export class TransactionService {
           (sa) => sa.user.toString() === userId.toString(),
         )?.amount;
         return {
+          id:transaction._id,
           amount: userShare, // User's share
           group: transaction.group,
           description: transaction.description,
