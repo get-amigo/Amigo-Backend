@@ -25,6 +25,7 @@ export class TransactionController {
     return this.transactionService.createTransaction(createTransactionDto);
   }
 
+
   @Get('expenses')
   getExpenses(
     @Req() req: Request,
@@ -43,6 +44,11 @@ export class TransactionController {
       page,
       size,
     );
+  }
+
+  @Get(':id')
+  getTransaction(@Param('id') transactionId) {
+    return this.transactionService.getTransaction(transactionId);
   }
 
   @Delete(':id')

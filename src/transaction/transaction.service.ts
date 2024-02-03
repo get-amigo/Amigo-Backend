@@ -40,6 +40,16 @@ export class TransactionService {
     return newTransaction;
   }
 
+  async getTransaction(transactionId) {
+    return this.transactionModel.findById(transactionId)
+      .populate('paidBy', 'name phoneNumber countryCode')
+      .populate('creator', 'name phoneNumber countryCode')
+      .populate([
+        { path: 'splitAmong.user', select: 'name phoneNumber countryCode' },
+      ]);
+  }
+  
+
   async getExpenses(userId, startDate, endDate, type, page, size) {
     const query = { 'splitAmong.user': userId };
 
@@ -75,7 +85,7 @@ export class TransactionService {
           (sa) => sa.user.toString() === userId.toString(),
         )?.amount;
         return {
-          id:transaction._id,
+          id: transaction._id,
           amount: userShare, // User's share
           group: transaction.group,
           description: transaction.description,
