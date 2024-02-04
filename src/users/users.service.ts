@@ -65,6 +65,33 @@ export class UsersService {
     return userIds;
   }
 
+  async createUsersAndGetUsers(phoneNumbers) {
+    let users = [];
+
+    for (let i = 0; i < phoneNumbers.length; i++) {
+      let user = await this.findUserPhoneNumber(
+        phoneNumbers[i].phoneNumber,
+        phoneNumbers[i].countryCode,
+      );
+
+      // If the user doesn't exist, create a new one
+      if (!user) {
+        const { phoneNumber, countryCode } = phoneNumbers[i];
+        const newUser = new this.userModel({
+          phoneNumber,
+          countryCode,
+        });
+
+        user = await newUser.save();
+        this.sendSMS(phoneNumbers, countryCode, 'Join our app');
+      }
+
+      users.push(user);
+    }
+
+    return users;
+  }
+
   async sendSMS(phoneNumber, countryCode, message) {
     if (process.env.ENV == 'production') {
       const client = Twilio(
