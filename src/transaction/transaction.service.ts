@@ -16,6 +16,7 @@ export class TransactionService {
       splitAmong;
       description;
       date;
+      type
     }>,
     private balanceService: BalanceService, // Inject BalanceService or similar functionality
     private activityFeedService: ActivityFeedService,
@@ -90,6 +91,7 @@ export class TransactionService {
           group: transaction.group,
           description: transaction.description,
           date: transaction.date,
+          category:transaction.type
         };
       });
 
