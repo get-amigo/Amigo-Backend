@@ -32,7 +32,7 @@ export class PaymentService {
       relatedId: payment._id,
       onModel: 'Payment',
     });
-    this.balanceService.fetchAndMinimizeTransaction(group, [transaction]);
+    await this.balanceService.fetchAndMinimizeTransaction(group, [transaction]);
     return payment;
   }
 
