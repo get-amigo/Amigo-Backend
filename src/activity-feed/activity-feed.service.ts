@@ -54,6 +54,37 @@ export class ActivityFeedService {
     }
   }
 
+  async findByGroup(groupId, lastActivityTime, size) {
+    let query = { group: groupId };
+    if (lastActivityTime) {
+        query['createdAt'] = { $lt: new Date(lastActivityTime) };
+    }
+
+    let activities = await this.activityModel
+    .find(query)
+    .limit(size)
+    .sort({ createdAt: -1 })
+    .populate([
+        { path: 'relatedId'},
+        { path: 'creator', select: 'name phoneNumber' },
+        { 
+          path: 'relatedId',
+          populate: [
+            { path: 'paidBy', select: 'name phoneNumber countryCode',strictPopulate:false },
+            { path: 'creator', select: 'name phoneNumber countryCode',strictPopulate:false },
+            { path: 'splitAmong.user', select: 'name phoneNumber countryCode',strictPopulate:false },
+            { path: 'payer', select: 'name phoneNumber countryCode',strictPopulate:false },
+            { path: 'receiver', select: 'name phoneNumber countryCode' ,strictPopulate:false},
+          ],
+        }
+    ])
+    .exec();
+
+
+    return activities;
+}
+
+
   async findById(activityId) {
     let activity = await this.activityModel.findById(activityId).exec();
 
@@ -62,27 +93,7 @@ export class ActivityFeedService {
     return activity;
   }
 
-  async findByGroup(groupId, lastActivityTime, size) {
-    let query = { group: groupId };
-    if (lastActivityTime) {
-      query['createdAt'] = { $lt: new Date(lastActivityTime) };
-    }
-
-    let activities = await this.activityModel
-      .find(query)
-      .limit(size)
-      .sort({ createdAt: -1 })
-      .populate({path: 'creator', select: 'name phoneNumber'})
-      .exec();
-
-    for (let activity of activities) {
-      await this.populateActivity(activity);
-    }
-
-    // console.log(JSON.stringify(activities));
-
-    return activities;
-  }
+ 
 
   findAll() {
     return `This action returns all activityFeed`;
