@@ -49,8 +49,7 @@ export class ActivityFeedService {
     const options = populationOptions[activity.onModel];
     if (options) {
       await this.activityModel.populate(activity, [
-        options,
-        { path: 'creator', select: 'name phoneNumber' },
+        options
       ]);
     }
   }
@@ -73,11 +72,14 @@ export class ActivityFeedService {
       .find(query)
       .limit(size)
       .sort({ createdAt: -1 })
+      .populate({path: 'creator', select: 'name phoneNumber'})
       .exec();
 
     for (let activity of activities) {
       await this.populateActivity(activity);
     }
+
+    // console.log(JSON.stringify(activities));
 
     return activities;
   }
