@@ -65,20 +65,20 @@ export class ActivityFeedService {
     .limit(size)
     .sort({ createdAt: -1 })
     .populate([
-        { path: 'relatedId'},
-        { path: 'creator', select: 'name phoneNumber' },
         { 
           path: 'relatedId',
           populate: [
-            { path: 'paidBy', select: 'name phoneNumber countryCode',strictPopulate:false },
-            { path: 'creator', select: 'name phoneNumber countryCode',strictPopulate:false },
-            { path: 'splitAmong.user', select: 'name phoneNumber countryCode',strictPopulate:false },
-            { path: 'payer', select: 'name phoneNumber countryCode',strictPopulate:false },
-            { path: 'receiver', select: 'name phoneNumber countryCode' ,strictPopulate:false},
+            { path: 'paidBy', select: 'name phoneNumber countryCode', strictPopulate: false },
+            { path: 'creator', select: 'name phoneNumber countryCode', strictPopulate: false },
+            { path: 'splitAmong.user', select: 'name phoneNumber countryCode', strictPopulate: false },
+            { path: 'payer', select: 'name phoneNumber countryCode', strictPopulate: false },
+            { path: 'receiver', select: 'name phoneNumber countryCode', strictPopulate: false },
           ],
-        }
+        },
+        { path: 'creator', select: 'name phoneNumber' }
     ])
     .exec();
+
 
 
     return activities;
