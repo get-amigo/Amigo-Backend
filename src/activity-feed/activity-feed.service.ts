@@ -48,42 +48,63 @@ export class ActivityFeedService {
 
     const options = populationOptions[activity.onModel];
     if (options) {
-      await this.activityModel.populate(activity, [
-        options
-      ]);
+      // Add population for activity.creator
+      options.populate.push({
+        path: 'creator',
+        select: 'name phoneNumber countryCode',
+      });
+
+      await this.activityModel.populate(activity, [options]);
     }
   }
 
   async findByGroup(groupId, lastActivityTime, size) {
     let query = { group: groupId };
     if (lastActivityTime) {
-        query['createdAt'] = { $lt: new Date(lastActivityTime) };
+      query['createdAt'] = { $lt: new Date(lastActivityTime) };
     }
 
     let activities = await this.activityModel
-    .find(query)
-    .limit(size)
-    .sort({ createdAt: -1 })
-    .populate([
-        { 
+      .find(query)
+      .limit(size)
+      .sort({ createdAt: -1 })
+      .populate([
+        {
           path: 'relatedId',
           populate: [
-            { path: 'paidBy', select: 'name phoneNumber countryCode', strictPopulate: false },
-            { path: 'creator', select: 'name phoneNumber countryCode', strictPopulate: false },
-            { path: 'splitAmong.user', select: 'name phoneNumber countryCode', strictPopulate: false },
-            { path: 'payer', select: 'name phoneNumber countryCode', strictPopulate: false },
-            { path: 'receiver', select: 'name phoneNumber countryCode', strictPopulate: false },
+            {
+              path: 'paidBy',
+              select: 'name phoneNumber countryCode',
+              strictPopulate: false,
+            },
+            {
+              path: 'creator',
+              select: 'name phoneNumber countryCode',
+              strictPopulate: false,
+            },
+            {
+              path: 'splitAmong.user',
+              select: 'name phoneNumber countryCode',
+              strictPopulate: false,
+            },
+            {
+              path: 'payer',
+              select: 'name phoneNumber countryCode',
+              strictPopulate: false,
+            },
+            {
+              path: 'receiver',
+              select: 'name phoneNumber countryCode',
+              strictPopulate: false,
+            },
           ],
         },
-        { path: 'creator', select: 'name phoneNumber' }
-    ])
-    .exec();
-
-
+        { path: 'creator', select: 'name phoneNumber' },
+      ])
+      .exec();
 
     return activities;
-}
-
+  }
 
   async findById(activityId) {
     let activity = await this.activityModel.findById(activityId).exec();
@@ -92,8 +113,6 @@ export class ActivityFeedService {
 
     return activity;
   }
-
- 
 
   findAll() {
     return `This action returns all activityFeed`;

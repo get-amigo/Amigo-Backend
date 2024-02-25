@@ -16,7 +16,7 @@ export class TransactionService {
       splitAmong;
       description;
       date;
-      type
+      type;
     }>,
     private balanceService: BalanceService, // Inject BalanceService or similar functionality
     private activityFeedService: ActivityFeedService,
@@ -42,14 +42,14 @@ export class TransactionService {
   }
 
   async getTransaction(transactionId) {
-    return this.transactionModel.findById(transactionId)
+    return this.transactionModel
+      .findById(transactionId)
       .populate('paidBy', 'name phoneNumber countryCode')
       .populate('creator', 'name phoneNumber countryCode')
       .populate([
         { path: 'splitAmong.user', select: 'name phoneNumber countryCode' },
       ]);
   }
-  
 
   async getExpenses(userId, startDate, endDate, type, page, size) {
     const query = { 'splitAmong.user': userId };
@@ -91,7 +91,7 @@ export class TransactionService {
           group: transaction.group,
           description: transaction.description,
           date: transaction.date,
-          category:transaction.type
+          category: transaction.type,
         };
       });
 

@@ -25,7 +25,6 @@ export class TransactionController {
     return this.transactionService.createTransaction(createTransactionDto);
   }
 
-
   @Get('expenses')
   getExpenses(
     @Req() req: Request,
