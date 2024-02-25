@@ -48,13 +48,10 @@ export class ActivityFeedService {
 
     const options = populationOptions[activity.onModel];
     if (options) {
-      // Add population for activity.creator
-      options.populate.push({
-        path: 'creator',
-        select: 'name phoneNumber countryCode',
-      });
-
-      await this.activityModel.populate(activity, [options]);
+      await this.activityModel.populate(activity, [
+        options,
+        { path: 'creator', select: 'name phoneNumber' },
+      ]);
     }
   }
 
