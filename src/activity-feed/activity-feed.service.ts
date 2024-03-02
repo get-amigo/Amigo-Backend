@@ -60,134 +60,168 @@ export class ActivityFeedService {
 
   async findByGroup(groupId, lastActivityTime, size) {
     let matchStage = {
-      $match: { group: new Types.ObjectId(groupId) }
-  };
+      $match: { group: new Types.ObjectId(groupId) },
+    };
 
-  if (lastActivityTime) {
-      matchStage.$match["createdAt"] = { $lt: new Date(lastActivityTime) };
-  }
+    if (lastActivityTime) {
+      matchStage.$match['createdAt'] = { $lt: new Date(lastActivityTime) };
+    }
 
-  let limitStage = { $limit: size };
+    let limitStage = { $limit: size };
 
-    
-    let activities = await this.activityModel.aggregate([
-      matchStage,
-      { $sort: { createdAt: -1 } },
-      limitStage,
-      {
-        $facet: {
-          branch1: [
-            {
-              $match: { onModel: "Transaction" } 
-            },{
-              $lookup: {
-                from: "transactions",
-                localField: "relatedId",
-                foreignField: "_id",
-                as: "transaction"
+    let activities = await this.activityModel
+      .aggregate([
+        matchStage,
+        { $sort: { createdAt: -1 } },
+        limitStage,
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'creator',
+            foreignField: '_id',
+            as: 'creator',
+          },
+        },
+        {
+          $unwind: '$creator',
+        },
+        {
+          $facet: {
+            transactions: [
+              {
+                $match: { onModel: 'Transaction' },
               },
-              
-            },
-            {
-              $unwind: "$transaction"
-            },
-            {
-              $lookup: {
-                from: "users", 
-                localField: "transaction.creator",
-                foreignField: "_id",
-                as: "transaction.creator"
-              }
-            },
-            {
-              $unwind: "$transaction.creator"
-            },
-            {
-              $lookup: {
-                from: "users", 
-                localField: "transaction.paidBy",
-                foreignField: "_id",
-                as: "transaction.paidBy"
-              }
-            },
-            {
-              $unwind: "$transaction.paidBy"
-            },
-            {
-              $lookup: {
-                from: "users",
-                localField: "transaction.splitAmong.user",
-                foreignField: "_id",
-                as: "splitUsers"
-              }
-            },
-            {
-              $addFields: {
-                "transaction.splitAmong": {
-                  $map: {
-                    input: "$transaction.splitAmong",
-                    as: "split",
-                    in: {
-                      $mergeObjects: [
-                        "$$split",
-                        {
-                          user: {
-                            $arrayElemAt: [
-                              {
-                                $filter: {
-                                  input: "$splitUsers",
-                                  as: "user",
-                                  cond: { $eq: ["$$user._id", "$$split.user"] }
-                                }
-                              },
-                              0
-                            ]
-                          }
-                        }
-                      ]
-                    }
-                  }
-                }
-              }
-            },
-          ],
-          branch2: [
-            {
-              $match: { onModel: "Payment" } 
-            },
-            {
-              $lookup: {
-                from: "payments",
-                let: { activityId: "$relatedId" },
-                pipeline: [
-                  { $match: { $expr: { $eq: ["$_id", "$$activityId"] } } },
-                  { $set: this.getPopulationObject("Payment") },
-                ],
-                as: "populatedPayments"
-              }
-            }
-          ],
-          branch3: [
-            {
-              $match: { onModel: "Chat" } 
-            },
-            {
-              $lookup: {
-                from: "chats",
-                let: { activityId: "$relatedId" },
-                pipeline: [
-                  { $match: { $expr: { $eq: ["$_id", "$$activityId"] } } },
-                  { $set:this.getPopulationObject("Chat") },
-                ],
-                as: "populatedChats"
-              }
-            }
-          ],
-        }
-      }
-    ])
-    .exec();
-    
+              {
+                $lookup: {
+                  from: 'transactions',
+                  localField: 'relatedId',
+                  foreignField: '_id',
+                  as: 'transaction',
+                },
+              },
+              {
+                $unwind: '$transaction',
+              },
+              {
+                $lookup: {
+                  from: 'users',
+                  localField: 'transaction.creator',
+                  foreignField: '_id',
+                  as: 'transaction.creator',
+                },
+              },
+              {
+                $unwind: '$transaction.creator',
+              },
+              {
+                $lookup: {
+                  from: 'users',
+                  localField: 'transaction.paidBy',
+                  foreignField: '_id',
+                  as: 'transaction.paidBy',
+                },
+              },
+              {
+                $unwind: '$transaction.paidBy',
+              },
+              {
+                $lookup: {
+                  from: 'users',
+                  localField: 'transaction.splitAmong.user',
+                  foreignField: '_id',
+                  as: 'splitUsers',
+                },
+              },
+              {
+                $addFields: {
+                  'transaction.splitAmong': {
+                    $map: {
+                      input: '$transaction.splitAmong',
+                      as: 'split',
+                      in: {
+                        $mergeObjects: [
+                          '$$split',
+                          {
+                            user: {
+                              $arrayElemAt: [
+                                {
+                                  $filter: {
+                                    input: '$splitUsers',
+                                    as: 'user',
+                                    cond: {
+                                      $eq: ['$$user._id', '$$split.user'],
+                                    },
+                                  },
+                                },
+                                0,
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+            payments: [
+              {
+                $match: { onModel: 'Payment' },
+              },
+              {
+                $lookup: {
+                  from: 'payments',
+                  localField: 'relatedId',
+                  foreignField: '_id',
+                  as: 'payment',
+                },
+              },
+              {
+                $unwind: '$payment',
+              },
+              {
+                $lookup: {
+                  from: 'users',
+                  localField: 'payment.payer',
+                  foreignField: '_id',
+                  as: 'payment.payer',
+                },
+              },
+              {
+                $unwind: '$payment.payer',
+              },
+              {
+                $lookup: {
+                  from: 'users',
+                  localField: 'payment.receiver',
+                  foreignField: '_id',
+                  as: 'payment.receiver',
+                },
+              },
+              {
+                $unwind: '$payment.receiver',
+              },
+            ],
+            chats: [
+              {
+                $match: { onModel: 'Chat' },
+              },
+              {
+                $lookup: {
+                  from: 'chats',
+                  localField: 'relatedId',
+                  foreignField: '_id',
+                  as: 'chat',
+                },
+              },
+              {
+                $unwind: '$chat',
+              },
+            ],
+          },
+        },
+      ])
+      .exec();
 
     return activities;
   }
