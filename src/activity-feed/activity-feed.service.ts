@@ -112,7 +112,44 @@ export class ActivityFeedService {
             },
             {
               $unwind: "$transaction.paidBy"
-            }
+            },
+            {
+              $lookup: {
+                from: "users",
+                localField: "transaction.splitAmong.user",
+                foreignField: "_id",
+                as: "splitUsers"
+              }
+            },
+            {
+              $addFields: {
+                "transaction.splitAmong": {
+                  $map: {
+                    input: "$transaction.splitAmong",
+                    as: "split",
+                    in: {
+                      $mergeObjects: [
+                        "$$split",
+                        {
+                          user: {
+                            $arrayElemAt: [
+                              {
+                                $filter: {
+                                  input: "$splitUsers",
+                                  as: "user",
+                                  cond: { $eq: ["$$user._id", "$$split.user"] }
+                                }
+                              },
+                              0
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
           ],
           branch2: [
             {
