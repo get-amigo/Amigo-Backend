@@ -220,18 +220,21 @@ export class ActivityFeedService {
             ],
           },
         },
+        {
+          $project: {
+            combinedArray: {
+              $concatArrays: ['$transactions', '$payments', '$chats'],
+            },
+          },
+        },
+        { $unwind: '$combinedArray' },
+        { $replaceRoot: { newRoot: '$combinedArray' } }, // Flatten the array
+        { $sort: { createdAt: -1 } }
       ])
       .exec();
 
-    let combinedArray = [
-      ...activities[0].transactions,
-      ...activities[0].payments,
-      ...activities[0].chats,
-    ];
 
-    combinedArray.sort((a, b) => b.createdAt - a.createdAt);
-
-    return combinedArray;
+    return activities
   }
 
   async findById(activityId) {
