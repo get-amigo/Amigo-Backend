@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import ActivityFeedSchema from './activity-feed.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { ActivityFeedDto } from './activity-feed-dto';
 @WebSocketGateway()
 @Injectable()
@@ -19,9 +19,7 @@ export class ActivityFeedService {
     this.server.emit('activity created', createdActivity);
   }
 
-  async populateActivity(activity) {
-    if (!activity.onModel) return;
-
+  getPopulationObject(activityType) {
     const populationOptions = {
       Transaction: {
         path: 'relatedId',
@@ -45,8 +43,13 @@ export class ActivityFeedService {
         model: 'Chat',
       },
     };
+    return populationOptions[activityType];
+  }
 
-    const options = populationOptions[activity.onModel];
+  async populateActivity(activity) {
+    if (!activity.onModel) return;
+
+    const options = this.getPopulationObject(activity.onModel);
     if (options) {
       await this.activityModel.populate(activity, [
         options,
@@ -56,49 +59,98 @@ export class ActivityFeedService {
   }
 
   async findByGroup(groupId, lastActivityTime, size) {
-    let query = { group: groupId };
-    if (lastActivityTime) {
-      query['createdAt'] = { $lt: new Date(lastActivityTime) };
-    }
+    let matchStage = {
+      $match: { group: new Types.ObjectId(groupId) }
+  };
 
-    let activities = await this.activityModel
-      .find(query)
-      .limit(size)
-      .sort({ createdAt: -1 })
-      .populate([
-        {
-          path: 'relatedId',
-          populate: [
+  if (lastActivityTime) {
+      matchStage.$match["createdAt"] = { $lt: new Date(lastActivityTime) };
+  }
+
+  let limitStage = { $limit: size };
+
+    
+    let activities = await this.activityModel.aggregate([
+      matchStage,
+      { $sort: { createdAt: -1 } },
+      limitStage,
+      {
+        $facet: {
+          branch1: [
             {
-              path: 'paidBy',
-              select: 'name phoneNumber countryCode',
-              strictPopulate: false,
+              $match: { onModel: "Transaction" } 
+            },{
+              $lookup: {
+                from: "transactions",
+                localField: "relatedId",
+                foreignField: "_id",
+                as: "transaction"
+              },
+              
             },
             {
-              path: 'creator',
-              select: 'name phoneNumber countryCode',
-              strictPopulate: false,
+              $unwind: "$transaction"
             },
             {
-              path: 'splitAmong.user',
-              select: 'name phoneNumber countryCode',
-              strictPopulate: false,
+              $lookup: {
+                from: "users", 
+                localField: "transaction.creator",
+                foreignField: "_id",
+                as: "transaction.creator"
+              }
             },
             {
-              path: 'payer',
-              select: 'name phoneNumber countryCode',
-              strictPopulate: false,
+              $unwind: "$transaction.creator"
             },
             {
-              path: 'receiver',
-              select: 'name phoneNumber countryCode',
-              strictPopulate: false,
+              $lookup: {
+                from: "users", 
+                localField: "transaction.paidBy",
+                foreignField: "_id",
+                as: "transaction.paidBy"
+              }
             },
+            {
+              $unwind: "$transaction.paidBy"
+            }
           ],
-        },
-        { path: 'creator', select: 'name phoneNumber' },
-      ])
-      .exec();
+          branch2: [
+            {
+              $match: { onModel: "Payment" } 
+            },
+            {
+              $lookup: {
+                from: "payments",
+                let: { activityId: "$relatedId" },
+                pipeline: [
+                  { $match: { $expr: { $eq: ["$_id", "$$activityId"] } } },
+                  { $set: this.getPopulationObject("Payment") },
+                ],
+                as: "populatedPayments"
+              }
+            }
+          ],
+          branch3: [
+            {
+              $match: { onModel: "Chat" } 
+            },
+            {
+              $lookup: {
+                from: "chats",
+                let: { activityId: "$relatedId" },
+                pipeline: [
+                  { $match: { $expr: { $eq: ["$_id", "$$activityId"] } } },
+                  { $set:this.getPopulationObject("Chat") },
+                ],
+                as: "populatedChats"
+              }
+            }
+          ],
+        }
+      }
+    ])
+    .exec();
+    
 
     return activities;
   }
