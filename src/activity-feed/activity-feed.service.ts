@@ -223,7 +223,15 @@ export class ActivityFeedService {
       ])
       .exec();
 
-    return activities;
+    let combinedArray = [
+      ...activities[0].transactions,
+      ...activities[0].payments,
+      ...activities[0].chats,
+    ];
+
+    combinedArray.sort((a, b) => b.createdAt - a.createdAt);
+
+    return combinedArray;
   }
 
   async findById(activityId) {
