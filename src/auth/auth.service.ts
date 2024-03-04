@@ -41,16 +41,25 @@ export class AuthService {
   }
 
   async sendOTP({ phoneNumber }) {
-    if (process.env.ENV != 'production') return { status: 'verified' };
-    const client = Twilio(
-      process.env.TWILIO_ACCOUNT_SID,
-      process.env.TWILIO_AUTH_TOKEN,
-    );
-    const { status } = await client.verify.v2
-      .services(process.env.TWILIO_VERIFICATION_SID)
-      .verifications.create({ to: phoneNumber, channel: 'sms' });
-    return status;
+    try {
+      if (process.env.ENV !== 'production') return { status: 'verified' };
+      
+      const client = Twilio(
+        process.env.TWILIO_ACCOUNT_SID,
+        process.env.TWILIO_AUTH_TOKEN,
+      );
+      
+      const { status } = await client.verify.v2
+        .services(process.env.TWILIO_VERIFICATION_SID)
+        .verifications.create({ to: phoneNumber, channel: 'sms' });
+      
+      return status;
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      return { error: "Failed to send OTP. Please try again later." };
+    }
   }
+  
 
   async sendOTPAndEditPhoneNumber(otpBody) {
     const { phoneNumber, countryCode } = otpBody;
