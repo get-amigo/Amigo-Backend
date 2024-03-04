@@ -71,21 +71,28 @@ export class AuthService {
   }
 
   async verifyOTP(otpBody, response) {
-    const { phoneNumber, countryCode, otp } = otpBody;
-    // Verify OTP using Twilio in production environment
-    if (process.env.ENV === 'production') {
-      await this.verifyTwilioOTP(phoneNumber, countryCode, otp, response);
+    try {
+      const { phoneNumber, countryCode, otp } = otpBody;
+      
+      // Verify OTP using Twilio in production environment
+      if (process.env.ENV === 'production') {
+        await this.verifyTwilioOTP(phoneNumber, countryCode, otp, response);
+      }
+  
+      // Find or create user based on phone number and country code
+      let user = await this.userService.findOrCreateUser(
+        phoneNumber,
+        countryCode,
+      );
+  
+      // Perform login with the user
+      this.login(user, response);
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      response.json( { error: "Failed to verify OTP. Please try again later." });
     }
-
-    // Find or create user based on phone number and country code
-    let user = await this.userService.findOrCreateUser(
-      phoneNumber,
-      countryCode,
-    );
-
-    // Perform login with the user
-    this.login(user, response);
   }
+  
 
   async verifyOTPAndEditPhoneNumber(userId, otpBody, response) {
     const { phoneNumber, countryCode, otp } = otpBody;
