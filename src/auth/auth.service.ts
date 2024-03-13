@@ -69,7 +69,7 @@ export class AuthService {
   async verifyOTP(otpBody, response) {
     try {
       const { sessionInfo, code } = otpBody;
-      const { phoneNumberWithCountryCode } = await this.verifyFirebaseOtp(
+      const { phoneNumber:phoneNumberWithCountryCode } = await this.verifyFirebaseOtp(
         sessionInfo,
         code,
       );
