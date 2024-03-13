@@ -4,6 +4,7 @@ import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { generalError } from 'src/utils/generalError';
 import Twilio from 'twilio';
+import getCountryCodeAndPhoneNumber from 'src/utils/getCountryCodeAndPhoneNumber';
 @Injectable()
 export class AuthService {
   constructor(
@@ -40,59 +41,54 @@ export class AuthService {
     });
   }
 
-  async sendOTP({ phoneNumber }) {
+  async verifyFirebaseOtp(sessionInfo, code) {
+    const apiKey = process.env.FIREBASE_WEB_API_KEY;
+    const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPhoneNumber?key=${apiKey}`;
+    const requestBody = {
+      sessionInfo,
+      code,
+    };
+
     try {
-      if (process.env.ENV !== 'production') return { status: 'verified' };
-      
-      const client = Twilio(
-        process.env.TWILIO_ACCOUNT_SID,
-        process.env.TWILIO_AUTH_TOKEN,
-      );
-      
-      const { status } = await client.verify.v2
-        .services(process.env.TWILIO_VERIFICATION_SID)
-        .verifications.create({ to: phoneNumber, channel: 'sms' });
-      
-      return status;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const responseData = await response.json();
+      return responseData;
     } catch (error) {
-      console.error("Error sending OTP:", error);
-      return { error: "Failed to send OTP. Please try again later." };
+      console.error('Error verifying OTP:', error);
+      throw error;
     }
-  }
-  
-
-  async sendOTPAndEditPhoneNumber(otpBody) {
-    const { phoneNumber, countryCode } = otpBody;
-
-    const user = this.userService.findUserPhoneNumber(phoneNumber, countryCode);
-    if (user) return { status: false };
-
-    return this.sendOTP(countryCode + phoneNumber);
   }
 
   async verifyOTP(otpBody, response) {
     try {
-      const { phoneNumber, countryCode, otp } = otpBody;
-      
-      // Verify OTP using Twilio in production environment
-      if (process.env.ENV === 'production') {
-        await this.verifyTwilioOTP(phoneNumber, countryCode, otp, response);
-      }
-  
-      // Find or create user based on phone number and country code
+      const { sessionInfo, code } = otpBody;
+      const { phoneNumberWithCountryCode } = await this.verifyFirebaseOtp(
+        sessionInfo,
+        code,
+      );
+      const { phoneNumber, countryCode } = getCountryCodeAndPhoneNumber(
+        phoneNumberWithCountryCode,
+      );
+
       let user = await this.userService.findOrCreateUser(
         phoneNumber,
         countryCode,
       );
-  
-      // Perform login with the user
+
       this.login(user, response);
     } catch (error) {
-      console.error("Error verifying OTP:", error);
-      response.json( { error: "Failed to verify OTP. Please try again later." });
+      response.json({
+        error: 'Failed to verify OTP. Please try again later.' + error,
+      });
     }
   }
-  
 
   async verifyOTPAndEditPhoneNumber(userId, otpBody, response) {
     const { phoneNumber, countryCode, otp } = otpBody;

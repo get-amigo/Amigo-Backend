@@ -57,7 +57,10 @@ export class ActivityFeedService {
 
   async findByGroup(groupId, lastActivityTime, size) {
     let query = { group: groupId };
-    if (typeof lastActivityTime === 'string' && !isNaN(Date.parse(lastActivityTime))) {
+    if (
+      typeof lastActivityTime === 'string' &&
+      !isNaN(Date.parse(lastActivityTime))
+    ) {
       query['createdAt'] = { $lt: new Date(lastActivityTime) };
     }
 
