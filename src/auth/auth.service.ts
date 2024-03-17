@@ -66,18 +66,36 @@ export class AuthService {
     }
   }
 
+  async verifyDevModeOtp(otpBody, response) {
+    try {
+      const { code, phoneNumber } = otpBody;
+
+      const { phoneNumber: phoneNumberWithCountryCode, countryCode } =
+        getCountryCodeAndPhoneNumber(phoneNumber);
+
+      const user = await this.userService.findOrCreateUser(
+        phoneNumberWithCountryCode,
+        countryCode,
+      );
+
+      this.login(user, response);
+    } catch (error) {
+      response.json({
+        error: 'Failed to verify OTP. Please try again later.' + error,
+      });
+    }
+  }
+
   async verifyOTP(otpBody, response) {
     try {
       const { sessionInfo, code } = otpBody;
-      const { phoneNumber:phoneNumberWithCountryCode } = await this.verifyFirebaseOtp(
-        sessionInfo,
-        code,
-      );
+      const { phoneNumber: phoneNumberWithCountryCode } =
+        await this.verifyFirebaseOtp(sessionInfo, code);
       const { phoneNumber, countryCode } = getCountryCodeAndPhoneNumber(
         phoneNumberWithCountryCode,
       );
 
-      let user = await this.userService.findOrCreateUser(
+      const user = await this.userService.findOrCreateUser(
         phoneNumber,
         countryCode,
       );
