@@ -19,10 +19,6 @@ export class AuthController {
 
   @Post('verifyOTP')
   async verifyOTP(@Body() otpBody, @Res() response) {
-    if (process.env.ENV === 'development' || process.env.ENV === 'dev') {
-      this.authService.verifyDevModeOtp(otpBody, response);
-      return;
-    }
     this.authService.verifyOTP(otpBody, response);
   }
 }
