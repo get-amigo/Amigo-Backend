@@ -33,11 +33,17 @@ export class AuthService {
     return accessToken;
   }
 
-  login(userData, response) {
-    const token = this.getAuthToken(userData);
+  async login(phoneNumber, response) {
+    const { phoneNumber: phoneNumberWithoutCountryCode, countryCode } =
+      getCountryCodeAndPhoneNumber(phoneNumber);
+    const user = await this.userService.findOrCreateUser(
+      phoneNumberWithoutCountryCode,
+      countryCode,
+    );
+    const token = this.getAuthToken(user);
     return response.json({
       token,
-      userData,
+      user,
     });
   }
 
@@ -66,23 +72,30 @@ export class AuthService {
     }
   }
 
+  async verifyDevModeOtp(otpBody, response) {
+    try {
+      const { code, phoneNumber } = otpBody;
+
+      this.login(phoneNumber, response);
+    } catch (error) {
+      response.json({
+        error: 'Failed to verify OTP. Please try again later.' + error,
+      });
+    }
+  }
+
   async verifyOTP(otpBody, response) {
     try {
+      if (process.env.ENV === 'development' || process.env.ENV === 'dev') {
+        this.verifyDevModeOtp(otpBody, response);
+        return;
+      }
+
       const { sessionInfo, code } = otpBody;
-      const { phoneNumber:phoneNumberWithCountryCode } = await this.verifyFirebaseOtp(
-        sessionInfo,
-        code,
-      );
-      const { phoneNumber, countryCode } = getCountryCodeAndPhoneNumber(
-        phoneNumberWithCountryCode,
-      );
+      const { phoneNumber: phoneNumberWithCountryCode } =
+        await this.verifyFirebaseOtp(sessionInfo, code);
 
-      let user = await this.userService.findOrCreateUser(
-        phoneNumber,
-        countryCode,
-      );
-
-      this.login(user, response);
+      this.login(phoneNumberWithCountryCode, response);
     } catch (error) {
       response.json({
         error: 'Failed to verify OTP. Please try again later.' + error,
