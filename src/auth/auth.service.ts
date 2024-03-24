@@ -74,9 +74,9 @@ export class AuthService {
 
   async verifyDevModeOtp(otpBody, response) {
     try {
-      const { code, phoneNumber } = otpBody;
+      const { payload, otp } = otpBody;
 
-      this.login(phoneNumber, response);
+      this.login(payload, response);
     } catch (error) {
       response.json({
         error: 'Failed to verify OTP. Please try again later.' + error,
@@ -91,9 +91,9 @@ export class AuthService {
         return;
       }
 
-      const { sessionInfo, code } = otpBody;
+      const { payload, otp } = otpBody;
       const { phoneNumber: phoneNumberWithCountryCode } =
-        await this.verifyFirebaseOtp(sessionInfo, code);
+        await this.verifyFirebaseOtp(payload, otp);
 
       this.login(phoneNumberWithCountryCode, response);
     } catch (error) {
