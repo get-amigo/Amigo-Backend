@@ -8,12 +8,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from 'src/users/users.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import UserSchema from 'src/users/users.schema';
+import GroupSchema from 'src/group/group.schema';
 
 @Module({
   controllers: [AuthController],
   imports: [
     UsersModule,
-    MongooseModule.forFeature([UserSchema]),
+    MongooseModule.forFeature([UserSchema,GroupSchema]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => {

@@ -13,12 +13,15 @@ const UserSchema = new Schema(
     name: {
       type: String,
     },
+    deletedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
   },
 );
 
-UserSchema.index({ phoneNumber: 1, countryCode: 1 }, { unique: true });
+UserSchema.index({ phoneNumber: 1, countryCode: 1 }, { unique: true,sparse: true});
 
 export default { name: 'User', schema: UserSchema };
