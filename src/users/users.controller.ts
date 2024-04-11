@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Put, Req, UseGuards,Delete } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 @UseGuards(new JwtAuthGuard('jwt'))
@@ -10,6 +10,12 @@ export class UsersController {
   async getUser(@Req() req: Request) {
     const { id } = req['user'];
     return this.usersService.findById(id);
+  }
+
+  @Delete()
+  async find(@Req() req: Request) {
+    const { id } = req['user'];
+    return this.usersService.deleteUser(id);
   }
 
   @Put()

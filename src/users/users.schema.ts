@@ -13,6 +13,9 @@ const UserSchema = new Schema(
     name: {
       type: String,
     },
+    deletedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,

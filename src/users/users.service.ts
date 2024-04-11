@@ -3,11 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import UserSchema from './users.schema';
 import Twilio from 'twilio';
+import GroupSchema from 'src/group/group.schema';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(UserSchema.name)
     private userModel: Model<typeof UserSchema>,
+    @InjectModel(GroupSchema.name)
+    private groupModel:Model<typeof GroupSchema>,
   ) {}
 
   async create(createUserBody) {
@@ -37,6 +40,30 @@ export class UsersService {
 
     return user;
   }
+
+  async exitAllGroups(userId) {
+    return await this.groupModel.updateMany(
+      { members: userId },
+      { $pull: { members: userId } },
+    );
+  }
+
+
+  async deleteUser(userId) {
+    const exitedGroups = await this.exitAllGroups(userId);
+    return await this.userModel.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          phoneNumber: null,
+          countryCode: null,
+          name: null,
+          deletedAt: new Date(), 
+        }
+      }
+    );
+  }
+  
 
   async createUsersAndGetIds(phoneNumbers) {
     let userIds = [];
