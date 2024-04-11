@@ -50,19 +50,22 @@ export class UsersService {
 
 
   async deleteUser(userId) {
-    const exitedGroups = await this.exitAllGroups(userId);
+    this.exitAllGroups(userId);
     return await this.userModel.updateOne(
       { _id: userId },
       {
+        $unset: {
+          phoneNumber: "", 
+          countryCode: "",
+          name: ""
+        },
         $set: {
-          phoneNumber: null,
-          countryCode: null,
-          name: null,
-          deletedAt: new Date(), 
+          deletedAt: new Date(),
         }
       }
     );
   }
+  
   
 
   async createUsersAndGetIds(phoneNumbers) {

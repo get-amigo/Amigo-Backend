@@ -15,7 +15,8 @@ export class UsersController {
   @Delete()
   async find(@Req() req: Request) {
     const { id } = req['user'];
-    return this.usersService.deleteUser(id);
+    const deletedUser=await this.usersService.deleteUser(id);
+    return deletedUser;
   }
 
   @Put()

@@ -22,6 +22,6 @@ const UserSchema = new Schema(
   },
 );
 
-UserSchema.index({ phoneNumber: 1, countryCode: 1 }, { unique: true });
+UserSchema.index({ phoneNumber: 1, countryCode: 1 }, { unique: true,sparse: true});
 
 export default { name: 'User', schema: UserSchema };
