@@ -18,7 +18,7 @@ export class PaymentService {
     private activityFeedService: ActivityFeedService,
   ) {}
   async create(createPaymentDto, creator) {
-    const { payer, receiver, amount, group } = createPaymentDto;
+    const { payer, receiver, amount, group,description } = createPaymentDto;
     const transaction = {
       lender: payer,
       borrower: receiver,
@@ -31,6 +31,7 @@ export class PaymentService {
       group,
       relatedId: payment._id,
       onModel: 'Payment',
+      description
     });
     await this.balanceService.fetchAndMinimizeTransaction(group, [transaction]);
     return payment;
