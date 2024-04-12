@@ -18,12 +18,11 @@ export class PaymentService {
     private activityFeedService: ActivityFeedService,
   ) {}
   async create(createPaymentDto, creator) {
-    const { payer, receiver, amount, group,description } = createPaymentDto;
+    const { payer, receiver, amount, group } = createPaymentDto;
     const transaction = {
       lender: payer,
       borrower: receiver,
       amount: parseInt(amount),
-      description
     };
     const payment = await this.paymentModel.create(createPaymentDto);
     this.activityFeedService.createActivity({
