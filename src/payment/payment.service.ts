@@ -23,6 +23,7 @@ export class PaymentService {
       lender: payer,
       borrower: receiver,
       amount: parseInt(amount),
+      description
     };
     const payment = await this.paymentModel.create(createPaymentDto);
     this.activityFeedService.createActivity({
@@ -30,8 +31,7 @@ export class PaymentService {
       creator,
       group,
       relatedId: payment._id,
-      onModel: 'Payment',
-      description
+      onModel: 'Payment'
     });
     await this.balanceService.fetchAndMinimizeTransaction(group, [transaction]);
     return payment;

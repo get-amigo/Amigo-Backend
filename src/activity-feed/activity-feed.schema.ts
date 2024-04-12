@@ -26,11 +26,7 @@ const ActivityFeedSchema = new Schema(
       type: String,
       required: false,
       enum: ['Transaction', 'Payment', 'Chat'],
-    },
-    description: {
-      type: String,
-      required: false,
-    },
+    }
   },
   {
     timestamps: true,
