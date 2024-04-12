@@ -25,7 +25,6 @@ export class PaymentService {
       amount: parseInt(amount),
     };
     const payment = await this.paymentModel.create(createPaymentDto);
-    console.log('payment', payment);
     this.activityFeedService.createActivity({
       activityType: 'payment',
       creator,

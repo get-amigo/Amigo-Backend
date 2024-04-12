@@ -97,6 +97,11 @@ export class ActivityFeedService {
               select: 'name phoneNumber countryCode',
               strictPopulate: false,
             },
+            {
+              path:'description',
+              select: 'description',
+              strictPopulate: false
+            }
           ],
         },
         { path: 'creator', select: 'name phoneNumber' },
