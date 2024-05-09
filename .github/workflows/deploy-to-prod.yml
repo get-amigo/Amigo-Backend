@@ -3,7 +3,7 @@ name: Deploy to Vercel
 on:
   push:
     branches:
-      - develop
+      - master
 
 jobs:
   deploy:
@@ -16,17 +16,17 @@ jobs:
     - name: Set Vercel Environment Variables
       run: |
         echo "VERCEL_ORG_ID=${{ secrets.VERCEL_ORG_ID }}" >> $GITHUB_ENV
-        echo "VERCEL_PROJECT_ID=${{ secrets.VERCEL_DEV_PROJECT_ID }}" >> $GITHUB_ENV
+        echo "VERCEL_PROJECT_ID=${{ secrets.VERCEL_PRODUCTION_PROJECT_ID }}" >> $GITHUB_ENV
 
     - name: Install dependencies
       run: npm install
 
     - name: Create .env file
       run: |
-        echo "JWT_SECRET=${{ secrets.DEV_JWT_SECRET }}" >> .env
-        echo "DATABASE_URL=${{ secrets.DEV_DATABASE_URL }}" >> .env
+        echo "JWT_SECRET=${{ secrets.PRODUCTION_JWT_SECRET }}" >> .env
+        echo "DATABASE_URL=${{ secrets.PRODUCTION_DATABASE_URL }}" >> .env
         echo "ACCESS_CODE_EXPIRY=1y" >> .env
-        echo "ENV=development" >> .env
+        echo "ENV=production" >> .env
 
     - name: Build project
       run: npm run build
