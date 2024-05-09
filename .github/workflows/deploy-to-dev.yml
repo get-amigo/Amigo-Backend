@@ -3,7 +3,7 @@ name: Deploy to Vercel
 on:
   push:
     branches:
-      - gh-action-test
+      - develop
 
 jobs:
   deploy:
