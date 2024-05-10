@@ -25,6 +25,7 @@ jobs:
       run: |
         echo "JWT_SECRET=${{ secrets.STAGING_JWT_SECRET }}" >> .env
         echo "DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}" >> .env
+        echo "FIREBASE_WEB_API_KEY=${{ secrets.FIREBASE_WEB_API_KEY }}" >> .env
         echo "ACCESS_CODE_EXPIRY=1y" >> .env
         echo "ENV=staging" >> .env
 
