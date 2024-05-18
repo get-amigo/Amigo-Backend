@@ -4,10 +4,8 @@ import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { generalError } from 'src/utils/generalError';
 import Twilio from 'twilio';
-import firebase from 'firebase-admin';
 import getCountryCodeAndPhoneNumber from 'src/utils/getCountryCodeAndPhoneNumber';
-
-let app: firebase.app.App;
+import { verifyToken } from 'src/utils/firebase';
 
 @Injectable()
 export class AuthService {
@@ -55,16 +53,7 @@ export class AuthService {
 
   async verifyFirebaseOtp(payload: string) {
     try {
-      if (!app) {
-        app = firebase.initializeApp({
-          credential: firebase.credential.cert({
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-          }),
-        });
-      }
-      const decodedToken = await app.auth().verifyIdToken(payload);
+      const decodedToken = await verifyToken(payload);
       return decodedToken.phone_number;
     } catch (error) {
       console.error('Error verifying OTP:', error);
