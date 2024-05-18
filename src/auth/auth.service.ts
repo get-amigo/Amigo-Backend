@@ -5,6 +5,8 @@ import * as bcrypt from 'bcrypt';
 import { generalError } from 'src/utils/generalError';
 import Twilio from 'twilio';
 import getCountryCodeAndPhoneNumber from 'src/utils/getCountryCodeAndPhoneNumber';
+import { verifyToken } from 'src/utils/firebase';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -33,73 +35,57 @@ export class AuthService {
     return accessToken;
   }
 
-  async login(phoneNumber, response) {
+  async login(phoneNumber: string) {
     const { phoneNumber: phoneNumberWithoutCountryCode, countryCode } =
       getCountryCodeAndPhoneNumber(phoneNumber);
+
     const user = await this.userService.findOrCreateUser(
       phoneNumberWithoutCountryCode,
       countryCode,
     );
     const token = this.getAuthToken(user);
-    return response.json({
+
+    return {
       token,
       user,
-    });
+    };
   }
 
-  async verifyFirebaseOtp(sessionInfo, code) {
-    const apiKey = process.env.FIREBASE_WEB_API_KEY;
-    const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPhoneNumber?key=${apiKey}`;
-    const requestBody = {
-      sessionInfo,
-      code,
-    };
-
+  async verifyFirebaseOtp(payload: string) {
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      const responseData = await response.json();
-      return responseData;
+      const decodedToken = await verifyToken(payload);
+      return decodedToken.phone_number;
     } catch (error) {
       console.error('Error verifying OTP:', error);
       throw error;
     }
   }
 
-  async verifyDevModeOtp(otpBody, response) {
+  async verifyDevModeOtp(payload: string) {
     try {
-      const { payload, otp } = otpBody;
-
-      this.login(payload, response);
+      return payload;
     } catch (error) {
-      response.json({
-        error: 'Failed to verify OTP. Please try again later.' + error,
-      });
+      console.log('Error verifying OTP:', error);
+      throw error;
     }
   }
 
-  async verifyOTP(otpBody, response) {
+  async verifyOTP(otpBody) {
+    let phoneNumberWithCountryCode: string;
     try {
+      const { payload } = otpBody;
+
       if (process.env.ENV === 'development' || process.env.ENV === 'dev') {
-        this.verifyDevModeOtp(otpBody, response);
-        return;
+        phoneNumberWithCountryCode = await this.verifyDevModeOtp(payload);
+      } else {
+        phoneNumberWithCountryCode = await this.verifyFirebaseOtp(payload);
       }
 
-      const { payload, otp } = otpBody;
-      const { phoneNumber: phoneNumberWithCountryCode } =
-        await this.verifyFirebaseOtp(payload, otp);
-
-      this.login(phoneNumberWithCountryCode, response);
+      return await this.login(phoneNumberWithCountryCode);
     } catch (error) {
-      response.json({
+      return {
         error: 'Failed to verify OTP. Please try again later.' + error,
-      });
+      };
     }
   }
 
