@@ -1,7 +1,12 @@
-import { Schema } from 'mongoose';
+import { Schema, Types } from 'mongoose';
 
 const TransactionSchema = new Schema(
   {
+    _id: {
+      type: Types.ObjectId,
+      required: false,
+      auto: true,
+    },
     amount: {
       type: Number,
       required: true,

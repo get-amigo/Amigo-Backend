@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import ChatSchema from './chat.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 @Injectable()
 export class ChatService {
@@ -9,8 +9,11 @@ export class ChatService {
     @InjectModel(ChatSchema.name)
     private chatModel: Model<typeof ChatSchema>,
   ) {}
-  create(createChatDto) {
-    const chat = new this.chatModel(createChatDto);
+  create(createChatDto, chatId = undefined) {
+    const chat = new this.chatModel({
+      _id: new Types.ObjectId(chatId),
+      ...createChatDto
+    });
     chat.save();
     return chat;
   }

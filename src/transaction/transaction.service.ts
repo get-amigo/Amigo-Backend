@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import TransactionSchema from './transaction.schema';
 // Assuming there's a service or function to handle balance updates
 import { BalanceService } from 'src/balance/balance.service'; // Import BalanceService or similar functionality
@@ -11,6 +11,7 @@ export class TransactionService {
   constructor(
     @InjectModel(TransactionSchema.name)
     private transactionModel: Model<{
+      _id: Types.ObjectId;
       creator;
       group;
       splitAmong;
@@ -23,10 +24,15 @@ export class TransactionService {
   ) {}
 
   async createTransaction(createTransactionDto) {
-    const newTransaction = new this.transactionModel(createTransactionDto);
+    const { transactionId, ...transactionData } = createTransactionDto;
+    const newTransaction = new this.transactionModel({
+      _id: transactionId ? new Types.ObjectId(transactionId) : undefined,
+      ...transactionData,
+    });
     await newTransaction.save();
     const { creator, group, _id: relatedId } = newTransaction;
     this.activityFeedService.createActivity({
+      _id:createTransactionDto.activityId,
       creator,
       group,
       relatedId,
