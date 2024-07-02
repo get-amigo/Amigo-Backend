@@ -169,6 +169,7 @@ export class GroupService {
           {
             $project: {
               _id: 1,
+              createdAt: 1,
               groupIds: ['$_id'], // Wrap _id in an array
               name: 1,
               members: {
@@ -216,6 +217,7 @@ export class GroupService {
           {
             $project: {
               _id: 1,
+              createdAt: 1,
               groupIds: 1,
               name: 1,
               members: 1,
@@ -233,6 +235,7 @@ export class GroupService {
           },
         ])
         .exec();
+        
 
       return userGroups;
     } catch (error) {
