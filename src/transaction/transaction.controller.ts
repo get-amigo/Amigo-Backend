@@ -9,6 +9,7 @@ import {
   UseGuards,
   Req,
   Query,
+  Put,
 } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -53,5 +54,13 @@ export class TransactionController {
   @Delete(':id')
   deleteTransaction(@Req() req: Request, @Param('id') transactionId) {
     return this.transactionService.deleteTransaction(transactionId);
+  }
+
+  @Put(':id')
+  async updateTransaction(
+    @Param('id') transactionId: string,
+    @Body() updateTransactionDto,
+  ) {
+    return this.transactionService.updateTransaction(transactionId, updateTransactionDto);
   }
 }
