@@ -45,6 +45,13 @@ export class TransactionService {
       .findById(transactionId)
       .populate('paidBy', 'name phoneNumber countryCode')
       .populate('creator', 'name phoneNumber countryCode')
+      .populate({
+        path: 'group',
+        populate: {
+          path: 'members',
+          select: 'name phoneNumber _id',
+        },
+      })
       .populate([
         { path: 'splitAmong.user', select: 'name phoneNumber countryCode' },
       ]);
