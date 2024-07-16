@@ -41,9 +41,10 @@ export class GroupService {
     return createdGroup.save();
   }
 
-  createChat(message, group, creator) {
-    const chat = this.chatService.create(message);
+  createChat(message, group, creator, activityId, chatId) {
+    const chat = this.chatService.create(message, chatId);
     return this.activityFeedService.createActivity({
+      _id:activityId,
       activityType: 'chat',
       creator,
       group,
