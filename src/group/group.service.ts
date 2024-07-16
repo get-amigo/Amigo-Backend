@@ -41,9 +41,10 @@ export class GroupService {
     return createdGroup.save();
   }
 
-  createChat(message, group, creator) {
-    const chat = this.chatService.create(message);
+  createChat(message, group, creator, activityId, chatId) {
+    const chat = this.chatService.create(message, chatId);
     return this.activityFeedService.createActivity({
+      _id:activityId,
       activityType: 'chat',
       creator,
       group,
@@ -168,6 +169,7 @@ export class GroupService {
           {
             $project: {
               _id: 1,
+              createdAt: 1,
               groupIds: ['$_id'], // Wrap _id in an array
               name: 1,
               members: {
@@ -215,6 +217,7 @@ export class GroupService {
           {
             $project: {
               _id: 1,
+              createdAt: 1,
               groupIds: 1,
               name: 1,
               members: 1,
@@ -232,6 +235,7 @@ export class GroupService {
           },
         ])
         .exec();
+        
 
       return userGroups;
     } catch (error) {
