@@ -26,6 +26,7 @@ export class GroupController {
     return this.groupService.create(createGroupBody);
   }
 
+
   @Delete(':id')
   leaveGroup(@Req() req: Request, @Param('id') groupId) {
     const { id } = req['user'];
@@ -58,12 +59,17 @@ export class GroupController {
   }
 
   @Post(':id/chat')
-  createChat(@Req() req: Request, @Param('id') groupId, @Body() message) {
+  createChat(@Req() req: Request, @Param('id') groupId, @Body() body) {
+    
+    const { message, activityId, chatId } = body;
+    
     const { id } = req['user'];
     return this.groupService.createChat(
-      message,
+      {message},
       groupId,
       new Types.ObjectId(id),
+      new Types.ObjectId(activityId),
+      new Types.ObjectId(chatId)
     );
   }
 
