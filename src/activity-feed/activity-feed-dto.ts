@@ -1,6 +1,11 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class ActivityFeedDto {
+
+  @IsString()
+  @IsNotEmpty()
+  _id: string; // Using string to represent ObjectId
+
   @IsEnum(['transaction', 'payment'])
   @IsNotEmpty()
   activityType: string;
