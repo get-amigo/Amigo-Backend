@@ -247,4 +247,15 @@ export class GroupService {
   async getAllTransactions(groupId) {
     return this.transactionService.getTransactionsByGroupId(groupId);
   }
+
+  async getGroupInfo(groupId): Promise<any> {
+    const group = await this.groupModel.findById(groupId).populate('members').exec();
+    if (!group) {
+      throw new Error('Group not found');
+    }
+    return {
+      name: group.name,
+      memberCount: group.members.length,
+    };
+  }
 }

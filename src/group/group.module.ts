@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { GroupService } from './group.service';
-import { GroupController } from './group.controller';
+import { GroupController, GroupControllerPublic } from './group.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import GroupSchema from './group.schema';
 import { TransactionService } from 'src/transaction/transaction.service';
@@ -35,7 +35,7 @@ import GroupBalanceSchema from 'src/balance/groupBalance.schema';
       GroupBalanceSchema,
     ]),
   ],
-  controllers: [GroupController, UsersController],
+  controllers: [GroupController, UsersController, GroupControllerPublic],
   providers: [
     GroupService,
     TransactionService,

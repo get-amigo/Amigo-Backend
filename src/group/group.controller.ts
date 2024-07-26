@@ -78,3 +78,15 @@ export class GroupController {
     return this.groupService.getAllTransactions(groupId);
   }
 }
+
+@Controller('group')
+export class GroupControllerPublic {
+  constructor(private readonly groupService: GroupService) {}
+
+  @Get(':id/info')
+  async getAllUserGroups(@Param('id') groupId) {
+
+    const id = new Types.ObjectId(groupId);
+    return this.groupService.getGroupInfo(id);
+  }
+}
