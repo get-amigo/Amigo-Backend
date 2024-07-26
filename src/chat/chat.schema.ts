@@ -1,7 +1,13 @@
-import { Schema } from 'mongoose';
+import { Schema, Types } from 'mongoose';
 
 const ChatSchema = new Schema(
   {
+    _id: {
+      type: Types.ObjectId,
+      required: false,
+      auto: true,
+    },
+
     message: {
       type: String,
       required: true,

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import ChatSchema from './chat.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 @Injectable()
 export class ChatService {
@@ -10,8 +10,11 @@ export class ChatService {
     private chatModel: Model<typeof ChatSchema>,
   ) {}
 
-  async create(createChatDto) {
-    const chat = new this.chatModel(createChatDto);
+  async create(createChatDto, chatId = undefined) {
+    const chat = new this.chatModel({
+      _id: chatId ? new Types.ObjectId(chatId) : undefined,
+      ...createChatDto,
+    });
     return await chat.save();
   }
 
