@@ -80,13 +80,26 @@ export class GroupController {
 }
 
 @Controller('group')
-export class GroupControllerPublic {
+export class GroupInviteController {
   constructor(private readonly groupService: GroupService) {}
 
-  @Get(':id/info')
-  async getAllUserGroups(@Param('id') groupId) {
+  @UseGuards(new JwtAuthGuard('jwt'))
+  @Get('/getGroupToken/:id')
+  async getGroupToken(@Param('id') groupId){    
+    return this.groupService.generateToken(groupId);
+  }
+  
 
-    const id = new Types.ObjectId(groupId);
+  @Get(':id/info')
+  async getAllUserGroups(@Param('id') id) {
     return this.groupService.getGroupInfo(id);
+  }
+
+  @UseGuards(new JwtAuthGuard('jwt'))
+  @Post(':id/joinWithLink')
+  async joinGroup(@Req() req: Request, @Param('id') groupId) {
+    const { id } = req['user'];
+    const decoded = await this.groupService.verifyToken(groupId);
+    return this.groupService.joinGroup(decoded.groupId, new Types.ObjectId(id));
   }
 }
