@@ -155,11 +155,11 @@ export class TransactionService {
   async updateTransaction(transactionId: string, updateTransactionDto) {
     const existingTransaction = await this.transactionModel.findById(transactionId).exec();
     if (!existingTransaction) {
-      throw new NotFoundException(`Transaction with ID ${transactionId} not found`);
+        throw new NotFoundException(`Transaction with ID ${transactionId} not found`);
     }
 
     if (!updateTransactionDto.paidBy || !updateTransactionDto.group) {
-      throw new Error('paidBy and group are required fields');
+        throw new Error('paidBy and group are required fields');
     }
 
     // Save the existing transaction before updating
@@ -169,18 +169,21 @@ export class TransactionService {
     await existingTransaction.save();
 
     const { creator, group, _id: relatedId } = existingTransaction;
-    this.activityFeedService.createActivity({
-      creator,
-      group,
-      relatedId,
-      activityType: 'transaction',
-      onModel: 'Transaction',
-      description: 'transaction updated',
+    
+    // Update the existing activity
+    await this.activityFeedService.updateActivityByRelationId(relatedId, {
+        creator,
+        group,
+        relatedId,
+        activityType: 'transaction',
+        onModel: 'Transaction',
+        description: 'transaction updated',
     });
 
     // Update balances
     await this.balanceService.updateBalancesAfterTransactionEdit(oldTransaction, updateTransactionDto);
 
     return existingTransaction;
-  }
+}
+
 }
