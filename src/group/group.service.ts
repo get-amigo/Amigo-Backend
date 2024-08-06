@@ -11,6 +11,7 @@ import { UsersService } from 'src/users/users.service';
 import { ChatService } from 'src/chat/chat.service';
 import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
 import { JwtService } from '@nestjs/jwt';
+import { decrypt, encrypt } from 'src/utils/cipher';
 @Injectable()
 export class GroupService {
   constructor(
@@ -121,7 +122,11 @@ export class GroupService {
     );
   }
 
-  async joinGroup(groupId, userId) {
+  async joinGroup(hashedGroupId, userId) {
+    const decodedGroupId = this.jwtService.decode(hashedGroupId);
+    const groupId = decrypt(decodedGroupId.groupId);
+
+    
     const group = await this.groupModel.findById(groupId).exec();
 
     if (!group) {
@@ -251,30 +256,22 @@ export class GroupService {
   }
 
   async generateToken(groupId){
-    const payload = { groupId };
-    return {
-      token: this.jwtService.sign(payload)
-    }
-  }
-
-  async verifyToken(token: string) {
-    try {
-      const decoded = this.jwtService.verify(token);
-      return decoded;
-    } catch (error) {
-      throw new Error('Invalid token');
-    }
-  }
-
-  async getGroupInfo(groupId): Promise<any> {
-    const decoded = this.jwtService.verify(groupId);
-    const group = await this.groupModel.findById(decoded.groupId).populate('members').exec();
+    const group = await this.groupModel.findById(groupId).populate('members').exec();
     if (!group) {
       throw new Error('Group not found');
     }
-    return {
+    
+    const hasedGroupId = encrypt(groupId);
+    
+
+    const payload = { 
+      groupId:hasedGroupId, 
       name: group.name,
-      memberCount: group.members.length,
+      memberCount: group.members.length 
     };
+  
+    return this.jwtService.sign(payload)
   }
+
+
 }

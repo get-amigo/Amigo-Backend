@@ -53,9 +53,9 @@ export class GroupController {
   }
 
   @Post(':id/join')
-  joinGroup(@Req() req: Request, @Param('id') groupId) {
+  joinGroup(@Req() req: Request, @Param('id') hashedGroupId) {
     const { id } = req['user'];
-    return this.groupService.joinGroup(groupId, new Types.ObjectId(id));
+    return this.groupService.joinGroup(hashedGroupId, new Types.ObjectId(id));
   }
 
   @Post(':id/chat')
@@ -77,29 +77,9 @@ export class GroupController {
   getAllTransactions(@Param('id') groupId) {
     return this.groupService.getAllTransactions(groupId);
   }
-}
 
-@Controller('group')
-export class GroupInviteController {
-  constructor(private readonly groupService: GroupService) {}
-
-  @UseGuards(new JwtAuthGuard('jwt'))
-  @Get('/getGroupToken/:id')
+  @Get(':id/token')
   async getGroupToken(@Param('id') groupId){    
     return this.groupService.generateToken(groupId);
-  }
-  
-
-  @Get(':id/info')
-  async getAllUserGroups(@Param('id') id) {
-    return this.groupService.getGroupInfo(id);
-  }
-
-  @UseGuards(new JwtAuthGuard('jwt'))
-  @Post(':id/joinWithLink')
-  async joinGroup(@Req() req: Request, @Param('id') groupId) {
-    const { id } = req['user'];
-    const decoded = await this.groupService.verifyToken(groupId);
-    return this.groupService.joinGroup(decoded.groupId, new Types.ObjectId(id));
   }
 }
