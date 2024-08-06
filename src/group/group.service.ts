@@ -123,7 +123,7 @@ export class GroupService {
   }
 
   async joinGroup(hashedGroupId, userId) {
-    const decodedGroupId = this.jwtService.decode(hashedGroupId);
+    const decodedGroupId = this.jwtService.verify(hashedGroupId);
     const groupId = decrypt(decodedGroupId.groupId);
 
     
