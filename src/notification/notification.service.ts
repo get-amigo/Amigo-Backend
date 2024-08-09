@@ -3,14 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as admin from 'firebase-admin';
 
-import { NotificationSchema, DeviceTokenSchema } from './notification.schema';
+import DeviceTokenSchema from './device-token.schema';
 import { CreateNotificationDto, CreateDeviceTokenDto } from './notification.dto';
 import { sendPushNotification } from 'src/utils/firebase';
 
 @Injectable()
 export class NotificationService {
   constructor(
-    @InjectModel(NotificationSchema.name) private readonly notificationModel: Model<CreateNotificationDto>,
     @InjectModel(DeviceTokenSchema.name) private readonly deviceTokenModel: Model<CreateDeviceTokenDto>,
   ) {}
 
@@ -38,9 +37,5 @@ export class NotificationService {
     };
 
     await sendPushNotification(message);
-
-    // Save notification to the database
-    const createdNotification = new this.notificationModel(createNotificationDto);
-    await createdNotification.save();
   }
 }

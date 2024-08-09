@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { NotificationService } from './notification.service';
 import { NotificationController } from './notification.controller';
-import { NotificationSchema, DeviceTokenSchema } from './notification.schema';
+import DeviceTokenSchema from './device-token.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([NotificationSchema, DeviceTokenSchema]),
+    MongooseModule.forFeature([DeviceTokenSchema]),
   ],
   providers: [NotificationService],
   controllers: [NotificationController],
