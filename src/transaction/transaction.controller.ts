@@ -3,26 +3,37 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
   Req,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Request } from 'express';
+import { pushToNotificationQueue } from 'src/utils/queue';
+
 @UseGuards(new JwtAuthGuard('jwt'))
 @Controller('transaction')
 export class TransactionController {
-  constructor(private readonly transactionService: TransactionService) {}
+  constructor(private readonly transactionService: TransactionService) { }
 
   @Post()
-  createTransaction(@Body() createTransactionDto, @Req() req: Request) {
+  async createTransaction(@Body() createTransactionDto, @Req() req: Request) {
+    if (!createTransactionDto['transactionId']) {
+      throw new BadRequestException('Transaction ID is required');
+    }
+
     const { id } = req['user'];
     createTransactionDto['creator'] = id;
-    return this.transactionService.createTransaction(createTransactionDto);
+
+    const newTransaction = await this.transactionService.createTransaction(createTransactionDto);
+
+    await pushToNotificationQueue(JSON.stringify(newTransaction));
+
+    return newTransaction;
   }
 
   @Get('expenses')

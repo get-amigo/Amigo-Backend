@@ -26,7 +26,7 @@ export class TransactionService {
   async createTransaction(createTransactionDto) {
     const { transactionId, ...transactionData } = createTransactionDto;
     const newTransaction = new this.transactionModel({
-      _id: transactionId ? new Types.ObjectId(transactionId) : undefined,
+      _id: new Types.ObjectId(transactionId),
       ...transactionData,
     });
     await newTransaction.save();
