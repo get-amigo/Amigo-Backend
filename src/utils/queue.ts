@@ -8,8 +8,10 @@ export const pushToNotificationQueue = async (data: string) => {
     await client.publish({
         url: process.env.QSTASH_PUBLISH_URL,
         body: data,
+        headers: {
+            'Content-Type': 'application/json',
+        },
     });
-
 };
 
 export const verifyNotificationQueuePayload = async ({ signature, body }: { signature: string, body: string }) => {
