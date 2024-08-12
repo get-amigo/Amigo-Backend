@@ -32,7 +32,7 @@ export class NotificationService {
     const tokens = await this.getTokens(userIds);
 
     const message: admin.messaging.MulticastMessage = {
-      data,
+      data: { type, data: JSON.stringify(data) },
       tokens,
     };
 
