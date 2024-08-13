@@ -261,11 +261,11 @@ export class GroupService {
       throw new Error('Group not found');
     }
     
-    const hasedGroupId = encrypt(groupId);
+    const hashedGroupId = encrypt(groupId);
     
 
     const payload = { 
-      groupId:hasedGroupId, 
+      groupId:hashedGroupId, 
       name: group.name,
       memberCount: group.members.length 
     };
