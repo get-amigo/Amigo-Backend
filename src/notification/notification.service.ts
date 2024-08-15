@@ -4,13 +4,13 @@ import { Model } from 'mongoose';
 import * as admin from 'firebase-admin';
 
 import DeviceTokenSchema from './device-token.schema';
-import { CreateNotificationDto, CreateDeviceTokenDto } from './notification.dto';
+import { CreateNotificationDto, DeviceTokenDto } from './notification.dto';
 import { sendPushNotification } from 'src/utils/firebase';
 
 @Injectable()
 export class NotificationService {
   constructor(
-    @InjectModel(DeviceTokenSchema.name) private readonly deviceTokenModel: Model<CreateDeviceTokenDto>,
+    @InjectModel(DeviceTokenSchema.name) private readonly deviceTokenModel: Model<DeviceTokenDto>,
   ) {}
 
   async getTokens(userIds: string[]) {
@@ -18,23 +18,23 @@ export class NotificationService {
     return tokens.map(({ token }) => token);
   }
 
-  async saveTokens(createDeviceTokenDto: CreateDeviceTokenDto) {
+  async saveTokens(createDeviceTokenDto: DeviceTokenDto) {
     const createdDeviceToken = new this.deviceTokenModel(createDeviceTokenDto);
     await createdDeviceToken.save();
   }
 
   async sendNotification(createNotificationDto: CreateNotificationDto): Promise<void> {
     const { data, type } = createNotificationDto;
-  //!! STAGE 1: Implement TRANSACTION_ADD push notification
-    const creatorUserId = data.creator;
-  
-    // Get the user IDs of the users who should receive the notification
-    const userIds = data.splitAmong.map(({ user }) => user).filter(userId => userId !== creatorUserId);
-    // const userIds = data.splitAmong.map(({ user }) => user);
+    
+    //!! STAGE 1: Implement TRANSACTION_ADD push notification
+
+    // Transaction creator should not receive a push notification
+    const userIds = data.splitAmong.map(({ user }) => user).filter((userId) => userId !== data.creator);
+
     const tokens = await this.getTokens(userIds);
   
     const message: admin.messaging.MulticastMessage = {
-      data: { 
+      data: {
         type, 
         data: JSON.stringify(data) 
       },
@@ -56,5 +56,9 @@ export class NotificationService {
     } catch (error) {
       console.log("error", error)
     }
+  }
+
+  async deleteToken(deviceTokenDto: DeviceTokenDto) {
+    await this.deviceTokenModel.deleteOne({ token: deviceTokenDto.token }).exec();
   }
 }

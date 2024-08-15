@@ -3,7 +3,7 @@ export class CreateNotificationDto {
   readonly type: 'TRANSACTION_ADD' | 'PAYMENT_SETTLED' | 'GROUP_JOIN_REQUEST' | 'CHAT_MESSAGE';
 }
 
-export class CreateDeviceTokenDto {
+export class DeviceTokenDto {
   readonly token: string;
   readonly platform: 'ANDROID' | 'IOS';
   readonly userId: string;

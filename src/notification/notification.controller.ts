@@ -1,6 +1,6 @@
-import { Controller, Post, Body, Req, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, Req, UnauthorizedException, Delete } from '@nestjs/common';
 import { NotificationService } from './notification.service';
-import { CreateDeviceTokenDto, CreateNotificationDto } from './notification.dto';
+import { DeviceTokenDto, CreateNotificationDto } from './notification.dto';
 import { verifyNotificationQueuePayload } from 'src/utils/queue';
 
 @Controller('notifications')
@@ -28,8 +28,14 @@ export class NotificationController {
   }
 
   @Post('device-token')
-  async saveTokens(@Body() token: CreateDeviceTokenDto) {
+  async saveTokens(@Body() token: DeviceTokenDto) {
     await this.notificationService.saveTokens(token);
     return { message: 'Tokens saved successfully' };
+  }
+
+  @Delete('device-token')
+  async deleteToken(@Body() token: DeviceTokenDto) {
+    await this.notificationService.deleteToken(token);
+    return { message: 'Token deleted successfully' };
   }
 }
