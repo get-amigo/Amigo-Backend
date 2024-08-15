@@ -19,6 +19,7 @@ import { ChatService } from 'src/chat/chat.service';
 import { ChatModule } from 'src/chat/chat.module';
 import ChatSchema from 'src/chat/chat.schema';
 import GroupBalanceSchema from 'src/balance/groupBalance.schema';
+
 @Module({
   imports: [
     TransactionModule,
