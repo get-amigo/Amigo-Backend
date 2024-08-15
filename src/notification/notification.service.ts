@@ -25,17 +25,36 @@ export class NotificationService {
 
   async sendNotification(createNotificationDto: CreateNotificationDto): Promise<void> {
     const { data, type } = createNotificationDto;
-
-    //!! STAGE 1: Implement TRANSACTION_ADD push notification
-    const userIds = data.splitAmong.map(({ user }) => user);
-
+  //!! STAGE 1: Implement TRANSACTION_ADD push notification
+    const creatorUserId = data.creator;
+  
+    // Get the user IDs of the users who should receive the notification
+    const userIds = data.splitAmong.map(({ user }) => user).filter(userId => userId !== creatorUserId);
+    // const userIds = data.splitAmong.map(({ user }) => user);
     const tokens = await this.getTokens(userIds);
-
+  
     const message: admin.messaging.MulticastMessage = {
-      data: { type, data: JSON.stringify(data) },
+      data: { 
+        type, 
+        data: JSON.stringify(data) 
+      },
       tokens,
+      android: {
+        priority: "high",
+      },
+      apns: {
+        payload: {
+          aps: {
+            content_available: true,
+          },
+        },
+      },
     };
-
-    await sendPushNotification(message);
+  
+    try {
+      await sendPushNotification(message);
+    } catch (error) {
+      console.log("error", error)
+    }
   }
 }
