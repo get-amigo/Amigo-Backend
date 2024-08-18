@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import UserSchema from './users.schema';
-import Twilio from 'twilio';
 import GroupSchema from 'src/group/group.schema';
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -65,8 +65,6 @@ export class UsersService {
       }
     );
   }
-  
-  
 
   async createUsersAndGetIds(phoneNumbers) {
     let userIds = [];
@@ -86,7 +84,6 @@ export class UsersService {
         });
 
         user = await newUser.save();
-        this.sendSMS(phoneNumbers, countryCode, 'Join our app');
       }
 
       userIds.push(user._id);
@@ -113,27 +110,12 @@ export class UsersService {
         });
 
         user = await newUser.save();
-        this.sendSMS(phoneNumbers, countryCode, 'Join our app');
       }
 
       users.push(user);
     }
 
     return users;
-  }
-
-  async sendSMS(phoneNumber, countryCode, message) {
-    if (process.env.ENV == 'production') {
-      const client = Twilio(
-        process.env.TWILIO_ACCOUNT_SID,
-        process.env.TWILIO_AUTH_TOKEN,
-      );
-      client.messages.create({
-        body: message, // Text of the SMS
-        to: '+' + countryCode + phoneNumber,
-        from: process.env.TWILIO_PHONE_NUMBER, // Replace with a valid Twilio number
-      });
-    }
   }
 
   async findById(id) {

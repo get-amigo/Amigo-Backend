@@ -53,9 +53,9 @@ export class GroupController {
   }
 
   @Post(':id/join')
-  joinGroup(@Req() req: Request, @Param('id') groupId) {
+  joinGroup(@Req() req: Request, @Param('id') hashedGroupId) {
     const { id } = req['user'];
-    return this.groupService.joinGroup(groupId, new Types.ObjectId(id));
+    return this.groupService.joinGroup(hashedGroupId, new Types.ObjectId(id));
   }
 
   @Post(':id/chat')
@@ -76,5 +76,10 @@ export class GroupController {
   @Get(':id/transactions')
   getAllTransactions(@Param('id') groupId) {
     return this.groupService.getAllTransactions(groupId);
+  }
+
+  @Get(':id/token')
+  async getGroupToken(@Param('id') groupId){    
+    return this.groupService.generateToken(groupId);
   }
 }

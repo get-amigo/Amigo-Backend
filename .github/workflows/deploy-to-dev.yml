@@ -25,6 +25,7 @@ jobs:
       run: |
         echo "JWT_SECRET=\"${{ secrets.DEV_JWT_SECRET }}\"" >> .env
         echo "DATABASE_URL=\"${{ secrets.DEV_DATABASE_URL }}\"" >> .env
+        echo "CRYPTO_SECRET_KEY=\"${{ secrets.DEV_CRYPTO_SECRET_KEY }}\"" >> .env
         echo "ACCESS_CODE_EXPIRY=\"1y\"" >> .env
         echo "ENV=\"development\"" >> .env
 
