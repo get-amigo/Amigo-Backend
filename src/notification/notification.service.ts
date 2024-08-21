@@ -21,11 +21,21 @@ export class NotificationService {
     const tokens = await this.deviceTokenModel.find({ userId: { $in: userIds } }).exec();
     return tokens.map(({ token }) => token);
   }
+async saveTokens(createDeviceTokenDto: DeviceTokenDto) {
+  const { token, userId, deviceId } = createDeviceTokenDto;
+  const existingDeviceToken = await this.deviceTokenModel.findOne({deviceId}).exec();
 
-  async saveTokens(createDeviceTokenDto: DeviceTokenDto) {
+  if (existingDeviceToken) {
+    if (existingDeviceToken.token !== token) {
+      existingDeviceToken.token = token;
+      await existingDeviceToken.save();
+    } else {
+    }
+  } else {
     const createdDeviceToken = new this.deviceTokenModel(createDeviceTokenDto);
     await createdDeviceToken.save();
   }
+}
 
   async sendNotification(createNotificationDto: CreateNotificationDto): Promise<void> {
     const { data, type } = createNotificationDto;
