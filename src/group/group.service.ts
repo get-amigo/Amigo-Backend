@@ -126,7 +126,6 @@ export class GroupService {
     const decodedGroupId = this.jwtService.verify(hashedGroupId);
     const groupId = decrypt(decodedGroupId.groupId);
 
-    
     const group = await this.groupModel.findById(groupId).exec();
 
     if (!group) {
@@ -134,18 +133,22 @@ export class GroupService {
     }
 
     const { members } = group;
-    // Check if the user is already a member of the group
+
     if (members.includes(userId)) {
       throw new BadRequestException('User already a member of the group');
     }
 
-    // Add the user to the group's members array
     members.push(userId);
 
-    // Save the updated group
-    await group.save();
+    const [, memberDetails] = await Promise.all([
+      group.save(),
+      this.userService.findUsersByIds(members),
+    ]);
 
-    return group; // Or some other meaningful response
+    return {
+      ...group.toObject(),
+      members: memberDetails,
+    };
   }
 
   async getAllUserGroups(userId) {
