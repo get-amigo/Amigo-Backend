@@ -44,8 +44,8 @@ export class GroupService {
     return createdGroup.save();
   }
 
-  createChat(message, group, creator, activityId, chatId) {
-    const chat = this.chatService.create(message, chatId);
+  async createChat(message, group, creator, activityId, chatId) {
+    const chat = await this.chatService.create(message, chatId);
     return this.activityFeedService.createActivity({
       _id:activityId,
       activityType: 'chat',
