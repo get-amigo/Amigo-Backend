@@ -10,6 +10,8 @@ import { TransactionService } from 'src/transaction/transaction.service';
 import { UsersService } from 'src/users/users.service';
 import { ChatService } from 'src/chat/chat.service';
 import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
+import { JwtService } from '@nestjs/jwt';
+import { decrypt, encrypt } from 'src/utils/cipher';
 @Injectable()
 export class GroupService {
   constructor(
@@ -19,6 +21,7 @@ export class GroupService {
     private userService: UsersService,
     private chatService: ChatService,
     private activityFeedService: ActivityFeedService,
+    private jwtService: JwtService
   ) {}
   async create(createGroupDto) {
     const { members, name, phoneNumbers } = createGroupDto;
@@ -119,7 +122,10 @@ export class GroupService {
     );
   }
 
-  async joinGroup(groupId, userId) {
+  async joinGroup(hashedGroupId, userId) {
+    const decodedGroupId = this.jwtService.verify(hashedGroupId);
+    const groupId = decrypt(decodedGroupId.groupId);
+
     const group = await this.groupModel.findById(groupId).exec();
 
     if (!group) {
@@ -127,18 +133,22 @@ export class GroupService {
     }
 
     const { members } = group;
-    // Check if the user is already a member of the group
+
     if (members.includes(userId)) {
       throw new BadRequestException('User already a member of the group');
     }
 
-    // Add the user to the group's members array
     members.push(userId);
 
-    // Save the updated group
-    await group.save();
+    const [, memberDetails] = await Promise.all([
+      group.save(),
+      this.userService.findUsersByIds(members),
+    ]);
 
-    return group; // Or some other meaningful response
+    return {
+      ...group.toObject(),
+      members: memberDetails,
+    };
   }
 
   async getAllUserGroups(userId) {
@@ -247,4 +257,24 @@ export class GroupService {
   async getAllTransactions(groupId) {
     return this.transactionService.getTransactionsByGroupId(groupId);
   }
+
+  async generateToken(groupId){
+    const group = await this.groupModel.findById(groupId).populate('members').exec();
+    if (!group) {
+      throw new Error('Group not found');
+    }
+    
+    const hashedGroupId = encrypt(groupId);
+    
+
+    const payload = { 
+      groupId:hashedGroupId, 
+      name: group.name,
+      memberCount: group.members.length 
+    };
+  
+    return this.jwtService.sign(payload)
+  }
+
+
 }

@@ -19,6 +19,8 @@ import { ChatService } from 'src/chat/chat.service';
 import { ChatModule } from 'src/chat/chat.module';
 import ChatSchema from 'src/chat/chat.schema';
 import GroupBalanceSchema from 'src/balance/groupBalance.schema';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 @Module({
   imports: [
     TransactionModule,
@@ -34,7 +36,18 @@ import GroupBalanceSchema from 'src/balance/groupBalance.schema';
       ChatSchema,
       GroupBalanceSchema,
     ]),
+
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => {
+        return {
+          secret: config.get<string>('JWT_SECRET'),
+        };
+      },
+      inject: [ConfigService],
+    }),
   ],
+  
   controllers: [GroupController, UsersController],
   providers: [
     GroupService,
