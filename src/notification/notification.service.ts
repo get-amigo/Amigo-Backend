@@ -3,63 +3,44 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as admin from 'firebase-admin';
 
+import { sendPushNotification } from 'src/utils/firebase';
 import DeviceTokenSchema from './device-token.schema';
 import { CreateNotificationDto, DeviceTokenDto } from './notification.dto';
-import { sendPushNotification } from 'src/utils/firebase';
-import GroupSchema from 'src/group/group.schema';
-import UsersSchema from 'src/users/users.schema';
+import { NotificationHandler } from './notification.handler';
 
 @Injectable()
 export class NotificationService {
   constructor(
     @InjectModel(DeviceTokenSchema.name) private readonly deviceTokenModel: Model<DeviceTokenDto>,
-    @InjectModel(GroupSchema.name) private readonly groupModel: Model<{ name: string }>,
-    @InjectModel(UsersSchema.name) private readonly userModel: Model<{ name: string }>,
+    private readonly notificationHandler: NotificationHandler,
   ) {}
 
   async getTokens(userIds: string[]) {
     const tokens = await this.deviceTokenModel.find({ userId: { $in: userIds } }).exec();
     return tokens.map(({ token }) => token);
   }
-async saveTokens(createDeviceTokenDto: DeviceTokenDto) {
-  const { token, userId, deviceId } = createDeviceTokenDto;
-  const existingDeviceToken = await this.deviceTokenModel.findOne({deviceId}).exec();
 
-  if (existingDeviceToken) {
-    if (existingDeviceToken.token !== token) {
+  async saveTokens(createDeviceTokenDto: DeviceTokenDto) {
+    const { token, deviceId } = createDeviceTokenDto;
+    const existingDeviceToken = await this.deviceTokenModel.findOne({ deviceId }).exec();
+
+    if (existingDeviceToken && existingDeviceToken.token !== token) {
       existingDeviceToken.token = token;
       await existingDeviceToken.save();
     } else {
+      const createdDeviceToken = new this.deviceTokenModel(createDeviceTokenDto);
+      await createdDeviceToken.save();
     }
-  } else {
-    const createdDeviceToken = new this.deviceTokenModel(createDeviceTokenDto);
-    await createdDeviceToken.save();
   }
-}
 
   async sendNotification(createNotificationDto: CreateNotificationDto): Promise<void> {
     const { data, type } = createNotificationDto;
     
-    //!! STAGE 1: Implement TRANSACTION_ADD push notification
-
-    // Transaction creator should not receive a push notification
-    const userIds = data.splitAmong.map(({ user }) => user).filter((userId) => userId !== data.creator);
-
-    const [groupDetails, creatorDetails, tokens] = await Promise.all([
-      this.groupModel.findById(data.group, { name: 1 }),
-      this.userModel.findById(data.creator, { name: 1 }),
-      this.getTokens(userIds),
-    ]);
+    const handler = this.notificationHandler.getHandler(type);
+    const { tokens, data: payload } = await handler(data, this.getTokens.bind(this));
 
     const message: admin.messaging.MulticastMessage = {
-      data: {
-        type, 
-        data: JSON.stringify({
-          ...data,
-          creator: creatorDetails,
-          group: groupDetails,
-        })
-      },
+      data: payload,
       tokens,
       android: {
         priority: "high",
