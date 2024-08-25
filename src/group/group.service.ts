@@ -92,40 +92,39 @@ export class GroupService {
     return group; // Or some other meaningful response
   }
 
-  async addMembers(groupId, phoneNumbers) {
-    // Find the group
+  async addMembers(groupId, phoneNumbers, invitee) {
     const group = await this.groupModel.findById(groupId).exec();
 
     if (!group) {
       throw new NotFoundException('Group not found');
     }
 
-    // Create users based on phone numbers and get their IDs
-    const newMemberIds =
-      await this.userService.createUsersAndGetIds(phoneNumbers);
+    const memberIds = await this.userService.createUsersAndGetIds(phoneNumbers);
 
-    // Filter out existing members from the new users
-    const nonExistingMembers = newMemberIds.filter(
+    const newMembers = memberIds.filter(
       (id) => !group.members.includes(id.toString()),
     );
 
-    // If all users are existing members, you can simply return the group without making any changes
-    if (nonExistingMembers.length === 0) {
+    // return group if no new members
+    if (newMembers.length === 0) {
       return group;
     }
 
-    // Add the new users to the group's members array
-    const newMemberObjectIds = nonExistingMembers.map(
-      (id) => new Types.ObjectId(id),
-    );
-    group.members.push(
-      ...newMemberObjectIds.map((objectId) => objectId.toString()),
-    );
+    const newMemberObjectIds = newMembers.map((id) => new Types.ObjectId(id));
+    group.members.push(...newMemberObjectIds.map((objectId) => objectId.toString()));
 
-    // Save the updated group
     await group.save();
 
-    return group; // Or some other meaningful response
+    await pushToNotificationQueue(JSON.stringify({
+      type: 'GROUP_JOINED',
+      data: {
+        group,
+        newMembers,
+        invitee,
+      },
+    }));
+
+    return group;
   }
 
   async editGroupName(groupId, groupName) {

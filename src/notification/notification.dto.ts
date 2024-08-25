@@ -3,7 +3,7 @@ export class CreateNotificationDto {
   readonly type:
     | 'TRANSACTION_ADD'
     | 'PAYMENT_SETTLED'
-    | 'GROUP_JOIN_REQUEST'
+    | 'GROUP_JOINED'
     | 'CHAT_MESSAGE';
 }
 
