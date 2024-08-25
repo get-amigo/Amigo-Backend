@@ -14,6 +14,7 @@ export class NotificationHandler {
   getHandler(type) {
     const handlers = {
       TRANSACTION_ADD: this.handleTransactionAdd.bind(this),
+      CHAT_MESSAGE: this.handleChatMessage.bind(this),
     };
 
     return handlers[type];
@@ -24,6 +25,28 @@ export class NotificationHandler {
 
     const [groupDetails, creatorDetails, tokens] = await Promise.all([
       this.groupModel.findById(data.group, { name: 1 }),
+      this.userModel.findById(data.creator, { name: 1 }),
+      getTokens(userIds),
+    ]);
+
+    return {
+      tokens,
+      data: JSON.stringify({
+        ...data,
+        creator: creatorDetails,
+        group: groupDetails,
+      }),
+    };
+  }
+
+  private async handleChatMessage(data, getTokens) {
+    const groupDetails = await this.groupModel.findById(data.group, { name: 1, members: 1 });
+
+    const userIds = groupDetails.members
+      .filter((userId) => userId.toString() !== data.creator)
+      .map(toString);
+
+    const [creatorDetails, tokens] = await Promise.all([
       this.userModel.findById(data.creator, { name: 1 }),
       getTokens(userIds),
     ]);

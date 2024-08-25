@@ -3,15 +3,18 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import GroupSchema from './group.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model, Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
+import { JwtService } from '@nestjs/jwt';
+
+import { decrypt, encrypt } from 'src/utils/cipher';
+import { pushToNotificationQueue } from 'src/utils/queue';
 import { TransactionService } from 'src/transaction/transaction.service';
 import { UsersService } from 'src/users/users.service';
 import { ChatService } from 'src/chat/chat.service';
 import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
-import { JwtService } from '@nestjs/jwt';
-import { decrypt, encrypt } from 'src/utils/cipher';
+import GroupSchema from './group.schema';
+
 @Injectable()
 export class GroupService {
   constructor(
@@ -46,14 +49,24 @@ export class GroupService {
 
   async createChat(message, group, creator, activityId, chatId) {
     const chat = await this.chatService.create(message, chatId);
-    return this.activityFeedService.createActivity({
+    const activity = {
       _id:activityId,
       activityType: 'chat',
       creator,
       group,
       relatedId: chat._id,
       onModel: 'Chat',
-    });
+    };
+
+    await this.activityFeedService.createActivity(activity);
+    
+    await pushToNotificationQueue(JSON.stringify({
+      type: 'CHAT_MESSAGE',
+      data: {
+        message,
+        ...activity,
+      },
+    }));
   }
 
   async leaveGroup(userId, groupId) {
