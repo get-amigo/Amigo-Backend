@@ -4,14 +4,17 @@ import ActivityFeedSchema from './activity-feed.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ActivityFeedDto } from './activity-feed-dto';
+
 @WebSocketGateway()
 @Injectable()
 export class ActivityFeedService {
   @WebSocketServer() server;
+
   constructor(
     @InjectModel(ActivityFeedSchema.name)
     private activityModel: Model<ActivityFeedDto>,
   ) {}
+
   async createActivity(createActivityDto) {
     const newActivity = new this.activityModel(createActivityDto);
     const createdActivity = await newActivity.save();
@@ -98,10 +101,10 @@ export class ActivityFeedService {
               strictPopulate: false,
             },
             {
-              path:'description',
+              path: 'description',
               select: 'description',
-              strictPopulate: false
-            }
+              strictPopulate: false,
+            },
           ],
         },
         { path: 'creator', select: 'name phoneNumber' },
@@ -113,9 +116,7 @@ export class ActivityFeedService {
 
   async findById(activityId) {
     let activity = await this.activityModel.findById(activityId).exec();
-
     await this.populateActivity(activity);
-
     return activity;
   }
 
@@ -137,5 +138,19 @@ export class ActivityFeedService {
 
   remove(id: number) {
     return `This action removes a #${id} activityFeed`;
+  }
+
+  async updateActivityByRelationId(relatedId, updateActivityDto) {
+    const existingActivity = await this.activityModel.findOne({ relatedId }).exec();
+    if (!existingActivity) {
+      throw new Error(`Activity with related ID ${relatedId} not found`);
+    }
+
+    Object.assign(existingActivity, updateActivityDto);
+    const updatedActivity = await existingActivity.save();
+    await this.populateActivity(updatedActivity);
+    this.server.emit('activity updated', updatedActivity);
+
+    return updatedActivity;
   }
 }
