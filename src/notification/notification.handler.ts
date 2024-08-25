@@ -16,6 +16,7 @@ export class NotificationHandler {
       TRANSACTION_ADD: this.handleTransactionAdd.bind(this),
       CHAT_MESSAGE: this.handleChatMessage.bind(this),
       GROUP_JOINED: this.handleGroupJoined.bind(this),
+      PAYMENT_SETTLED: this.handlePaymentSettled.bind(this),
     };
 
     return handlers[type];
@@ -75,6 +76,23 @@ export class NotificationHandler {
       data: JSON.stringify({
         group: data.group,
         invitee: inviteeDetails,
+      }),
+    };
+  }
+
+  private async handlePaymentSettled(data, getTokens) {
+    const userIds = [data.receiver];
+
+    const [payerDetails, tokens] = await Promise.all([
+      this.userModel.findById(data.payer, { name: 1 }),
+      getTokens(userIds),
+    ]);
+
+    return {
+      tokens,
+      data: JSON.stringify({
+        ...data,
+        payer: payerDetails,
       }),
     };
   }
