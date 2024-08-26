@@ -81,7 +81,11 @@ export class NotificationHandler {
   }
 
   private async handlePaymentSettled(data, getTokens) {
-    const userIds = [data.receiver];
+    const groupDetails = await this.groupModel.findById(data.group, { name: 1, members: 1 });
+    
+    const userIds = groupDetails.members
+      .filter((userId) => userId.toString() !== data.payer)
+      .map(toString);
 
     const [payerDetails, tokens] = await Promise.all([
       this.userModel.findById(data.payer, { name: 1 }),
