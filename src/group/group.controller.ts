@@ -66,7 +66,7 @@ export class GroupController {
     
     const { id } = req['user'];
     return this.groupService.createChat(
-      {message},
+      { message },
       groupId,
       new Types.ObjectId(id),
       new Types.ObjectId(activityId),

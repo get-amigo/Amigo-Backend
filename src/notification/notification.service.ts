@@ -40,7 +40,10 @@ export class NotificationService {
     const { tokens, data: payload } = await handler(data, this.getTokens.bind(this));
 
     const message: admin.messaging.MulticastMessage = {
-      data: payload,
+      data: {
+        type, 
+        data: payload,
+      },
       tokens,
       android: {
         priority: "high",
@@ -53,7 +56,7 @@ export class NotificationService {
         },
       },
     };
-  
+
     try {
       await sendPushNotification(message);
     } catch (error) {

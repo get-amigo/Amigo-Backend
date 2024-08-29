@@ -63,7 +63,7 @@ export class GroupService {
     await pushToNotificationQueue(JSON.stringify({
       type: 'CHAT_MESSAGE',
       data: {
-        message,
+        ...message,
         ...activity,
       },
     }));

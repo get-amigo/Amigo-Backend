@@ -8,7 +8,7 @@ import UsersSchema from 'src/users/users.schema';
 export class NotificationHandler {
   constructor(
     @InjectModel(GroupSchema.name) private readonly groupModel: Model<{ name: string, members: Types.ObjectId[] }>,
-    @InjectModel(UsersSchema.name) private readonly userModel: Model<{ name: string }>,
+    @InjectModel(UsersSchema.name) private readonly userModel: Model<{ name: string, phoneNumber: string }>,
   ) {}
 
   getHandler(type) {
@@ -27,7 +27,7 @@ export class NotificationHandler {
 
     const [groupDetails, creatorDetails, tokens] = await Promise.all([
       this.groupModel.findById(data.group, { name: 1 }),
-      this.userModel.findById(data.creator, { name: 1 }),
+      this.userModel.findById(data.creator, { name: 1, phoneNumber: 1 }),
       getTokens(userIds),
     ]);
 
@@ -46,10 +46,10 @@ export class NotificationHandler {
 
     const userIds = groupDetails.members
       .filter((userId) => userId.toString() !== data.creator)
-      .map(toString);
+      .map((userId) => userId.toString());
 
     const [creatorDetails, tokens] = await Promise.all([
-      this.userModel.findById(data.creator, { name: 1 }),
+      this.userModel.findById(data.creator, { name: 1, phoneNumber: 1 }),
       getTokens(userIds),
     ]);
 
@@ -67,7 +67,7 @@ export class NotificationHandler {
     const userIds = data.newMembers;
 
     const [inviteeDetails, tokens] = await Promise.all([
-      this.userModel.findById(data.invitee, { name: 1 }),
+      this.userModel.findById(data.invitee, { name: 1, phoneNumber: 1 }),
       getTokens(userIds),
     ]);
 
@@ -85,10 +85,10 @@ export class NotificationHandler {
     
     const userIds = groupDetails.members
       .filter((userId) => userId.toString() !== data.payer)
-      .map(toString);
+      .map((userId) => userId.toString());
 
     const [payerDetails, tokens] = await Promise.all([
-      this.userModel.findById(data.payer, { name: 1 }),
+      this.userModel.findById(data.payer, { name: 1, phoneNumber: 1 }),
       getTokens(userIds),
     ]);
 
@@ -97,6 +97,7 @@ export class NotificationHandler {
       data: JSON.stringify({
         ...data,
         payer: payerDetails,
+        group: groupDetails,
       }),
     };
   }
