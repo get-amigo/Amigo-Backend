@@ -23,6 +23,16 @@ export class GroupService {
     private activityFeedService: ActivityFeedService,
     private jwtService: JwtService
   ) {}
+
+ // find group by its Id
+ async findGroupById(groupId: string) {
+  const group = await this.groupModel.findById(groupId).exec();
+  if (!group) {
+    throw new NotFoundException('Group not found');
+  }
+  return group;
+}
+
   async create(createGroupDto) {
     const { members, name, phoneNumbers } = createGroupDto;
     const newMemberIds =

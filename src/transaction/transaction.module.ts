@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { TransactionController } from './transaction.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -9,9 +9,11 @@ import BalanceSchema from 'src/balance/balance.schema';
 import GroupBalanceSchema from 'src/balance/groupBalance.schema';
 import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
 import ActivityFeedSchema from 'src/activity-feed/activity-feed.schema';
+import { GroupModule } from 'src/group/group.module';
 @Module({
   imports: [
     BalanceModule,
+    forwardRef(() => GroupModule),
     MongooseModule.forFeature([
       TransactionSchema,
       BalanceSchema,
