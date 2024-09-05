@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { GroupController } from './group.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -23,7 +23,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 @Module({
   imports: [
-    TransactionModule,
+    forwardRef(() => TransactionModule),
     BalanceModule,
     UsersModule,
     ChatModule,
@@ -57,5 +57,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     ActivityFeedService,
     ChatService,
   ],
+  exports: [GroupService],
 })
 export class GroupModule {}
