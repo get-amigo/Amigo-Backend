@@ -29,4 +29,12 @@ export class ActivityFeedDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @IsString()
+  @IsOptional()
+  replyTo?: string;
+
+  @IsString()
+  @IsOptional()
+  replyingMessage?: string;
 }

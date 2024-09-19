@@ -2,19 +2,31 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import ChatSchema from './chat.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { create } from 'domain';
 
 @Injectable()
 export class ChatService {
   constructor(
     @InjectModel(ChatSchema.name)
     private chatModel: Model<typeof ChatSchema>,
-  ) {}
+  ) { }
 
-  async create(createChatDto, chatId = undefined) {
+  async create(createChatDto: any, chatId: string | undefined = undefined) {
+    console.log('Received DTO:', createChatDto);
+
+    let messageContent = createChatDto.message;
+    if (typeof messageContent === 'object' && messageContent.message) {
+      messageContent = messageContent.message;
+    }
+
     const chat = new this.chatModel({
       _id: chatId ? new Types.ObjectId(chatId) : undefined,
-      ...createChatDto,
+      message: messageContent,
+      replyTo: createChatDto.replyTo,  // Keep replyTo as is
+      replyingMessage: createChatDto.replyingMessage,
     });
+
+    console.log('Saving chat:', chat);
     return await chat.save();
   }
 
