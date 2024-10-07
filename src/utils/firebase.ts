@@ -27,8 +27,15 @@ export const verifyToken = async (token: string) => {
 export const sendPushNotification = async (message: firebase.messaging.MulticastMessage) => {
   try {
     initFirebase();
-    await app.messaging().sendEachForMulticast(message);
-  } catch (error) {
+  const res  =   await app.messaging().sendEachForMulticast(message);
+res.responses.forEach((res)=>{
+  if(!res.success){
+    console.log("error",res.error)
+  }
+ 
+})
+} catch (error) {
+  console.log(error)
     return error;
   }
 }
