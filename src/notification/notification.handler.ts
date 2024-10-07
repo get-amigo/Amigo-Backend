@@ -64,10 +64,17 @@ export class NotificationHandler {
   }
 
   private async handleGroupJoined(data, getTokens) {
-    const userIds = data.newMembers;
+    const invitee = data.invitee;
+    const newMembers = data.newMembers
+    const userIds = data.group.members.filter((userId)=> { if(invitee!==userId){ return userId}});
 
-    const [inviteeDetails, tokens] = await Promise.all([
+    const [inviteeDetails,newMembersDetail,tokens] = await Promise.all([
       this.userModel.findById(data.invitee, { name: 1, phoneNumber: 1 }),
+      this.userModel.find({
+        '_id':{
+          $in:newMembers,
+        }
+      },{name:1,phoneNumber:1}),
       getTokens(userIds),
     ]);
 
@@ -76,6 +83,7 @@ export class NotificationHandler {
       data: JSON.stringify({
         group: data.group,
         invitee: inviteeDetails,
+        newMembers:newMembersDetail
       }),
     };
   }
