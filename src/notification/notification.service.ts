@@ -17,9 +17,12 @@ export class NotificationService {
 
   async getTokens(userIds: string[]) {
     const tokens = await this.deviceTokenModel.find({ userId: { $in: userIds } }).exec();
-    return tokens.map(({ token }) => token);
+    
+  const tokenArray = tokens.map(({ token }) => token)
+ const uniqueTokenArray = Array.from(new Set(tokenArray))
+       console.log("tokens",uniqueTokenArray)
+    return uniqueTokenArray;
   }
-
   async saveTokens(createDeviceTokenDto: DeviceTokenDto) {
     const { token, deviceId } = createDeviceTokenDto;
     const existingDeviceToken = await this.deviceTokenModel.findOne({ deviceId }).exec();
@@ -35,7 +38,6 @@ export class NotificationService {
 
   async sendNotification(createNotificationDto: CreateNotificationDto): Promise<void> {
     const { data, type } = createNotificationDto;
-    
     const handler = this.notificationHandler.getHandler(type);
     const { tokens, data: payload } = await handler(data, this.getTokens.bind(this));
 
@@ -58,7 +60,7 @@ export class NotificationService {
     };
 
     try {
-      await sendPushNotification(message);
+     await sendPushNotification(message);
     } catch (error) {
       console.log("error", error)
     }
