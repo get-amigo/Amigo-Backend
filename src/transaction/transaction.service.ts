@@ -28,7 +28,7 @@ export class TransactionService {
       _id: new Types.ObjectId(transactionId),
       ...transactionData,
     });
-    await newTransaction.save();
+    const savedTransaction = await newTransaction.save();
     const { creator, group, _id: relatedId } = newTransaction;
     this.activityFeedService.createActivity({
       _id:createTransactionDto.activityId,
@@ -42,8 +42,9 @@ export class TransactionService {
     await this.balanceService.updateBalancesAfterTransaction(
       createTransactionDto,
     );
+    const transactionHistory= await this.balanceService.findAll(creator);
 
-    return newTransaction;
+    return {...savedTransaction.toObject(),transactionHistory:transactionHistory};
   }
 
   async getTransaction(transactionId) {
