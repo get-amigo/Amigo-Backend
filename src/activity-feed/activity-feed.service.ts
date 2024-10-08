@@ -18,6 +18,8 @@ export class ActivityFeedService {
   async createActivity(createActivityDto) {
     const newActivity = new this.activityModel(createActivityDto);
     const createdActivity = await newActivity.save();
+    console.log('We are deep inside the creation of activitty',createdActivity);
+    
     await this.populateActivity(createdActivity);
     this.server.emit('activity created', createdActivity);
   }

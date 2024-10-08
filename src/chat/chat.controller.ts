@@ -15,13 +15,17 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 @Controller('chat')
 @UseGuards(new JwtAuthGuard('jwt'))
 export class ChatController {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(private readonly chatService: ChatService) { }
 
   @Post()
   create(@Body() createChatDto, @Req() req: Request) {
-    const { id } = req['user'];
+    const { id } = req['user']; // Get user ID from JWT payload
+    console.log('Received message', createChatDto);  // Log the message
+
+    // You can add logic to save or process the message
     return this.chatService.create(createChatDto);
   }
+
 
   @Get()
   findAll() {
@@ -29,7 +33,7 @@ export class ChatController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) { 
+  findOne(@Param('id') id: string) {
     return this.chatService.findOne(id);
   }
 
@@ -39,7 +43,7 @@ export class ChatController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) { 
+  remove(@Param('id') id: string) {
     return this.chatService.remove(id);
   }
 }

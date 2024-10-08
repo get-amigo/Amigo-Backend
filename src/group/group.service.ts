@@ -22,7 +22,7 @@ export class GroupService {
     private chatService: ChatService,
     private activityFeedService: ActivityFeedService,
     private jwtService: JwtService
-  ) {}
+  ) { }
   async create(createGroupDto) {
     const { members, name, phoneNumbers } = createGroupDto;
     const newMemberIds =
@@ -44,10 +44,16 @@ export class GroupService {
     return createdGroup.save();
   }
 
-  async createChat(message, group, creator, activityId, chatId) {
-    const chat = await this.chatService.create(message, chatId);
+  async createChat(message, replyTo, replyingMessage, group, creator, activityId, chatId) {
+    console.log(replyTo, replyingMessage, ' we are inside the service');
+    let newMessage = {
+      message: message.message || message, // This handles both string and object cases
+      replyTo: replyTo,
+      replyingMessage: replyingMessage
+    };
+    const chat = await this.chatService.create(newMessage, chatId);
     return this.activityFeedService.createActivity({
-      _id:activityId,
+      _id: activityId,
       activityType: 'chat',
       creator,
       group,
@@ -245,7 +251,7 @@ export class GroupService {
           },
         ])
         .exec();
-        
+
 
       return userGroups;
     } catch (error) {
@@ -258,21 +264,21 @@ export class GroupService {
     return this.transactionService.getTransactionsByGroupId(groupId);
   }
 
-  async generateToken(groupId){
+  async generateToken(groupId) {
     const group = await this.groupModel.findById(groupId).populate('members').exec();
     if (!group) {
       throw new Error('Group not found');
     }
-    
-    const hashedGroupId = encrypt(groupId);
-    
 
-    const payload = { 
-      groupId:hashedGroupId, 
+    const hashedGroupId = encrypt(groupId);
+
+
+    const payload = {
+      groupId: hashedGroupId,
       name: group.name,
-      memberCount: group.members.length 
+      memberCount: group.members.length
     };
-  
+
     return this.jwtService.sign(payload)
   }
 

@@ -12,6 +12,12 @@ const ChatSchema = new Schema(
       type: String,
       required: true,
     },
+    replyTo: {
+      type: String,
+    },
+    replyingMessage: {
+      type: String,
+    },
   },
   {
     timestamps: true,

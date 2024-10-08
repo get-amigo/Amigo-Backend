@@ -17,7 +17,7 @@ import { Types } from 'mongoose';
 @UseGuards(new JwtAuthGuard('jwt'))
 @Controller('group')
 export class GroupController {
-  constructor(private readonly groupService: GroupService) {}
+  constructor(private readonly groupService: GroupService) { }
 
   @Post()
   create(@Req() req: Request, @Body() createGroupBody) {
@@ -60,18 +60,36 @@ export class GroupController {
 
   @Post(':id/chat')
   createChat(@Req() req: Request, @Param('id') groupId, @Body() body) {
-    
-    const { message, activityId, chatId } = body;
-    
+    let { message, activityId, chatId, replyTo, replyingMessage } = body;
+    console.log(`Received message: ${replyTo} ${replyingMessage}`);
+
     const { id } = req['user'];
-    return this.groupService.createChat(
-      {message},
-      groupId,
-      new Types.ObjectId(id),
-      new Types.ObjectId(activityId),
-      new Types.ObjectId(chatId)
-    );
+
+    if (replyTo && replyingMessage) {
+      return this.groupService.createChat(
+        { message },
+        replyTo,
+        replyingMessage,
+        groupId,
+        new Types.ObjectId(id),
+        new Types.ObjectId(activityId),
+        new Types.ObjectId(chatId)
+      );
+    } else {
+      replyTo = null
+      replyingMessage = null
+      return this.groupService.createChat(
+        { message },
+        replyTo,
+        replyingMessage,
+        groupId,
+        new Types.ObjectId(id),
+        new Types.ObjectId(activityId),
+        new Types.ObjectId(chatId)
+      );
+    }
   }
+
 
   @Get(':id/transactions')
   getAllTransactions(@Param('id') groupId) {
@@ -79,7 +97,7 @@ export class GroupController {
   }
 
   @Get(':id/token')
-  async getGroupToken(@Param('id') groupId){    
+  async getGroupToken(@Param('id') groupId) {
     return this.groupService.generateToken(groupId);
   }
 }
