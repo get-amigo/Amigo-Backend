@@ -44,7 +44,7 @@ export class TransactionService {
     );
     const transactionHistory= await this.balanceService.findAll(creator);
 
-    return {...savedTransaction.toObject(),transactionHistory:transactionHistory};
+    return {...savedTransaction.toObject()};
   }
 
   async getTransaction(transactionId) {
