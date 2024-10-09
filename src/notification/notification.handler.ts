@@ -67,26 +67,31 @@ export class NotificationHandler {
     const invitee = data.invitee;
     const newMembers = data.newMembers
     const userIds = data.group.members.filter((userId)=> { if(invitee!==userId){ return userId}});
-
-    const [inviteeDetails,newMembersDetail,tokens] = await Promise.all([
+   const  newMembersDetail =  await this.userModel.find({
+    '_id':{
+      $in:newMembers,
+    } },{name:1,phoneNumber:1}).lean().exec()
+    const [inviteeDetails,tokens] = await Promise.all([
       this.userModel.findById(data.invitee, { name: 1, phoneNumber: 1 }),
-      this.userModel.find({
-        '_id':{
-          $in:newMembers,
-        }
-      },{name:1,phoneNumber:1}),
       getTokens(userIds),
-    ]);
-
+     
+    
+    ])
     return {
       tokens,
       data: JSON.stringify({
-        group: data.group,
+        group: {
+          _id : data.group._id,
+          name: data.group.name,
+        },
         invitee: inviteeDetails,
-        newMembers:newMembersDetail
+        newMembers:newMembersDetail,
       }),
     };
   }
+
+    
+  
 
   private async handlePaymentSettled(data, getTokens) {
     const groupDetails = await this.groupModel.findById(data.group, { name: 1, members: 1 });
@@ -94,7 +99,6 @@ export class NotificationHandler {
     const userIds = groupDetails.members
       .filter((userId) => userId.toString() !== data.payer)
       .map((userId) => userId.toString());
-
     const [payerDetails, tokens] = await Promise.all([
       this.userModel.findById(data.payer, { name: 1, phoneNumber: 1 }),
       getTokens(userIds),
