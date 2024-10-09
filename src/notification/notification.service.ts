@@ -20,8 +20,7 @@ export class NotificationService {
     
   const tokenArray = tokens.map(({ token }) => token)
  const uniqueTokenArray = Array.from(new Set(tokenArray))
-       console.log("tokens",uniqueTokenArray)
-    return uniqueTokenArray;
+ return uniqueTokenArray;
   }
   async saveTokens(createDeviceTokenDto: DeviceTokenDto) {
     const { token, deviceId } = createDeviceTokenDto;
@@ -60,7 +59,7 @@ export class NotificationService {
     };
 
     try {
-     await sendPushNotification(message);
+   await sendPushNotification(message);
     } catch (error) {
       console.log("error", error)
     }
