@@ -181,4 +181,10 @@ export class BalanceService {
       .populate('lender', 'name phoneNumber countryCode') // Populate the 'user' field and include 'name' only
       .exec();
   }
+
+  async updateBalancesAfterTransactionEdit(oldTransaction, newTransactionDto) {
+    await this.updateBalancesAfterTransactionDeletion(oldTransaction);
+
+    await this.updateBalancesAfterTransaction(newTransactionDto);
+  }
 }

@@ -129,4 +129,8 @@ export class UsersService {
   async editName(id, name) {
     return await this.userModel.findByIdAndUpdate(id, { name: name }).exec();
   }
+
+  async findUsersByIds(userIds: string[], projection = {}) {
+    return await this.userModel.find({ _id: { $in: userIds } }, projection).exec();
+  }
 }

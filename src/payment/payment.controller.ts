@@ -10,7 +10,6 @@ import {
   Req,
 } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { UsersController } from 'src/users/users.controller';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @UseGuards(new JwtAuthGuard('jwt'))

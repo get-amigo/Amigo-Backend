@@ -4,6 +4,7 @@ import PaymentSchema from './payment.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { BalanceService } from 'src/balance/balance.service';
 import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
+import { pushToNotificationQueue } from 'src/utils/queue';
 @Injectable()
 export class PaymentService {
   constructor(
@@ -33,6 +34,12 @@ export class PaymentService {
       onModel: 'Payment'
     });
     await this.balanceService.fetchAndMinimizeTransaction(group, [transaction]);
+
+    await pushToNotificationQueue(JSON.stringify({
+      type: 'PAYMENT_SETTLED',
+      data: createPaymentDto,
+    }))
+
     return payment;
   }
 

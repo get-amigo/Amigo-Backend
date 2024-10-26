@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import ChatSchema from './chat.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -9,28 +9,40 @@ export class ChatService {
     @InjectModel(ChatSchema.name)
     private chatModel: Model<typeof ChatSchema>,
   ) {}
-  create(createChatDto, chatId = undefined) {
+
+  async create(createChatDto, chatId = undefined) {
     const chat = new this.chatModel({
-      _id: new Types.ObjectId(chatId),
-      ...createChatDto
+      _id: chatId ? new Types.ObjectId(chatId) : undefined,
+      ...createChatDto,
     });
-    chat.save();
+    return await chat.save();
+  }
+
+  async findAll() {
+    return await this.chatModel.find().exec();
+  }
+
+  async findOne(id: string) {
+    const chat = await this.chatModel.findById(id).exec();
+    if (!chat) {
+      throw new NotFoundException(`Chat with ID ${id} not found`);
+    }
     return chat;
   }
 
-  findAll() {
-    return `This action returns all chat`;
+  async update(id: string, updateChatDto) {
+    const updatedChat = await this.chatModel.findByIdAndUpdate(id, updateChatDto, { new: true }).exec();
+    if (!updatedChat) {
+      throw new NotFoundException(`Chat with ID ${id} not found`);
+    }
+    return updatedChat;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} chat`;
-  }
-
-  update(id: number, updateChatDto) {
-    return `This action updates a #${id} chat`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} chat`;
+  async remove(id: string) {
+    const deletedChat = await this.chatModel.findByIdAndDelete(id).exec();
+    if (!deletedChat) {
+      throw new NotFoundException(`Chat with ID ${id} not found`);
+    }
+    return deletedChat;
   }
 }

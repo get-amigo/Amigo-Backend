@@ -21,6 +21,7 @@ import ChatSchema from 'src/chat/chat.schema';
 import GroupBalanceSchema from 'src/balance/groupBalance.schema';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+
 @Module({
   imports: [
     TransactionModule,
