@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import TransactionSchema from './transaction.schema';
-// Assuming there's a service or function to handle balance updates
 import { BalanceService } from 'src/balance/balance.service'; // Import BalanceService or similar functionality
 import { ActivityFeedService } from 'src/activity-feed/activity-feed.service';
 
@@ -26,10 +25,10 @@ export class TransactionService {
   async createTransaction(createTransactionDto) {
     const { transactionId, ...transactionData } = createTransactionDto;
     const newTransaction = new this.transactionModel({
-      _id: transactionId ? new Types.ObjectId(transactionId) : undefined,
+      _id: new Types.ObjectId(transactionId),
       ...transactionData,
     });
-    await newTransaction.save();
+    const savedTransaction = await newTransaction.save();
     const { creator, group, _id: relatedId } = newTransaction;
     this.activityFeedService.createActivity({
       _id:createTransactionDto.activityId,
@@ -43,8 +42,9 @@ export class TransactionService {
     await this.balanceService.updateBalancesAfterTransaction(
       createTransactionDto,
     );
+    const transactionHistory= await this.balanceService.findAll(creator);
 
-    return newTransaction;
+    return {...savedTransaction.toObject()};
   }
 
   async getTransaction(transactionId) {
@@ -52,6 +52,13 @@ export class TransactionService {
       .findById(transactionId)
       .populate('paidBy', 'name phoneNumber countryCode')
       .populate('creator', 'name phoneNumber countryCode')
+      .populate({
+        path: 'group',
+        populate: {
+          path: 'members',
+          select: 'name phoneNumber _id',
+        },
+      })
       .populate([
         { path: 'splitAmong.user', select: 'name phoneNumber countryCode' },
       ]);
@@ -145,4 +152,39 @@ export class TransactionService {
       .sort({ date: -1 }) // Sort by date in descending order
       .exec();
   }
+
+  async updateTransaction(transactionId: string, updateTransactionDto) {
+    const existingTransaction = await this.transactionModel.findById(transactionId).exec();
+    if (!existingTransaction) {
+        throw new NotFoundException(`Transaction with ID ${transactionId} not found`);
+    }
+
+    if (!updateTransactionDto.paidBy || !updateTransactionDto.group) {
+        throw new Error('paidBy and group are required fields');
+    }
+
+    // Save the existing transaction before updating
+    const oldTransaction = existingTransaction.toObject();
+
+    Object.assign(existingTransaction, updateTransactionDto);
+    await existingTransaction.save();
+
+    const { creator, group, _id: relatedId } = existingTransaction;
+    
+    // Update the existing activity
+    await this.activityFeedService.updateActivityByRelationId(relatedId, {
+        creator,
+        group,
+        relatedId,
+        activityType: 'transaction',
+        onModel: 'Transaction',
+        description: 'transaction updated',
+    });
+
+    // Update balances
+    await this.balanceService.updateBalancesAfterTransactionEdit(oldTransaction, updateTransactionDto);
+
+    return existingTransaction;
+}
+
 }

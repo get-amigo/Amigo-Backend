@@ -11,6 +11,7 @@ import { BalanceModule } from './balance/balance.module';
 import { PaymentModule } from './payment/payment.module';
 import { ActivityFeedModule } from './activity-feed/activity-feed.module';
 import { ChatModule } from './chat/chat.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -24,8 +25,10 @@ import { ChatModule } from './chat/chat.module';
     PaymentModule,
     ActivityFeedModule,
     ChatModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
+
 export class AppModule {}
