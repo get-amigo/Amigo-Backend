@@ -34,8 +34,9 @@ export class GroupController {
   }
 
   @Patch(':id')
-  addMembers(@Param('id') groupId, @Body() phoneNumbers) {
-    return this.groupService.addMembers(groupId, phoneNumbers);
+  addMembers(@Req() req: Request, @Param('id') groupId, @Body() phoneNumbers) {
+    const { id: invitee } = req['user'];
+    return this.groupService.addMembers(groupId, phoneNumbers, invitee);
   }
 
   @Get()
@@ -65,7 +66,7 @@ export class GroupController {
     
     const { id } = req['user'];
     return this.groupService.createChat(
-      {message},
+      { message },
       groupId,
       new Types.ObjectId(id),
       new Types.ObjectId(activityId),

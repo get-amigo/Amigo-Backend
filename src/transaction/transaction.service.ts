@@ -25,7 +25,7 @@ export class TransactionService {
   async createTransaction(createTransactionDto) {
     const { transactionId, ...transactionData } = createTransactionDto;
     const newTransaction = new this.transactionModel({
-      _id: transactionId ? new Types.ObjectId(transactionId) : undefined,
+      _id: new Types.ObjectId(transactionId),
       ...transactionData,
     });
     const savedTransaction = await newTransaction.save();
@@ -44,7 +44,7 @@ export class TransactionService {
     );
     const transactionHistory= await this.balanceService.findAll(creator);
 
-    return {...savedTransaction.toObject(),transactionHistory:transactionHistory};
+    return {...savedTransaction.toObject()};
   }
 
   async getTransaction(transactionId) {
