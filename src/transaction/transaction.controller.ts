@@ -32,7 +32,7 @@ export class TransactionController {
 
     const newTransaction = await this.transactionService.createTransaction(createTransactionDto);
 
-    await pushToNotificationQueue(JSON.stringify({ type: "TRANSACTION_ADD", data: newTransaction }));
+    // await pushToNotificationQueue(JSON.stringify({ type: "TRANSACTION_ADD", data: newTransaction }));
 
     return newTransaction;
   }
